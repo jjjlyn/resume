@@ -19,6 +19,7 @@
   - Router53
 
 개발 환경만 구축된 AWS는 아래와 같은 구조로 VPC 내에 서브넷 한개로 구성되어 있습니다. 기존 서브넷으로는 내부 IP를 250개 정도 사용가능하여 개발 환경용으로는 충분하나 운영용으로는 부족할 수 있어 서브넷을 추가로 생성하였습니다. 
+
 ![개발환경 아키텍쳐](images/dev-env.png)
 
 개발, 운영환경을 구분한 모습입니다.
@@ -57,9 +58,9 @@
 Nginx와 도커, 도커 컴포즈를 다운로드 합니다. 도커 설치 후에 도커 허브에서 registry 이미지를 `pull` 받고 컨테이너화 해야 합니다.
 > docker private registy 사용 이유
 > 
-> 도커는 개발자가 만든 이미지를 공유하는 공식 저장소(docker hub)를 제공하고 있습니다. 그러나 사내 환경에서는 모든 이미지를 전체 도커 사용자에게 공유하지 않고 내부망에서만 관리해야 할 필요가 있습니다. 그럴 때 필요한 원격 저장소가 docker private registry입니다. 일반적으로 포트 5000번에 할당됩니다.
+> 도커는 개발자가 만든 이미지를 공유하는 공식 저장소(docker hub)를 제공하고 있습니다. 그러나 사내 환경에서는 모든 이미지를 전체 도커 사용자에게 공유하지 않고 내부망에서만 관리해야 할 필요가 있습니다. 그럴 때 필요한 원격 저장소가 docker private registry입니다. 컨테이너 포트는 기본값 5000번으로 지정되어 있습니다.
 
-docker private registry도 Nginx에서 관리할 수 있도록 CNAME으로 추가해 주었습니다. (예: `docker.jjjlyn.io` -> `common.jjjlyn.io`로 매핑) Nginx에서 로컬호스트 5000번으로 이동하도록 포트포워딩 설정도 해줍니다.
+docker private registry도 Nginx에서 관리할 수 있도록 CNAME으로 추가해 주었습니다. (예: `docker.jjjlyn.io` -> `common.jjjlyn.io`로 매핑) Nginx에서 로컬호스트 5000번(편의상 도커 컨테이너 포트 기본값 5000번과 동일한 5000번으로 지정)으로 이동하도록 포트포워딩 설정도 해줍니다.
 [참고 - 도커 외부통신 동작 원리](infra/how-docker-network-works.md)
 
 VM 도커 컨테이너는 CLI에서 `docker run`로 직접 띄우거나 `docker compose`를 이용하여 한꺼번에 띄울 수 있지만, 팀에서는 Azure Pipelines를 사용했습니다. 자세한 내용은 [Azure Pipelines로 CI/CD 자동화하기](infra/server-app-ci-cd.md)를 참고해주세요:)
@@ -230,7 +231,7 @@ curl --user {레지스트리 ID}:{비밀번호} -X GET https://{외부 IP}:5000/
 레지스트리 이미지 목록을 성공적으로 가져온 예시입니다.
 ![basic-auth-success](https://user-images.githubusercontent.com/43571225/171328728-eafba112-1033-4b99-8527-16fc7a1cbe64.png)
 
-:question: 위에서도 언급하였지만, 클라이언트와 호스트가 https 통신을 하려면 자체 서명 인증서를 클라이언트 환경의 `신뢰할 수 있는 인증서 목록`에 추가해야 합니다. 로컬에서 원격지의 registry에 접근하는 경우에는 로컬(클라이언트) 환경에 한번 적용한 후 계속 목록에 유지될 것입니다. 그러나 Azure Pipelines와 같이 매번 새로운 빌드 환경을 제공하는 경우에는 어떻게 해야 할까요?
+위에서도 언급하였지만, 클라이언트와 호스트가 https 통신을 하려면 자체 서명 인증서를 클라이언트 환경의 `신뢰할 수 있는 인증서 목록`에 추가해야 합니다. 로컬에서 원격지의 registry에 접근하는 경우에는 로컬(클라이언트) 환경에 한번 적용한 후 계속 목록에 유지될 것입니다. 그러나 Azure Pipelines와 같이 매번 새로운 빌드 환경을 제공하는 경우에는 어떻게 해야 할까요?
 
 저는 자체 인증서 추가 로직을 CI/CD 파이프라인에 삽입했습니다. DockerFile에 삽입해도 됩니다. 자세한 내용은 [Azure Pipelines로 CI/CD 자동화하기](infra/server-app-ci-cd.md)에서 확인하실 수 있습니다.
 
