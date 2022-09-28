@@ -1,0 +1,3 @@
+- UI(activity, fragment)는 `onBackPressed`가 실행될 때만 `onDestroyView`가 호출된다. (스택에서 pop되었을 때만)
+- ViewModel은 지정한 scope에 해당하는 화면의 lifecycle이 종료되었을 때 `onCleared`를 호출한다.
+  - 예를 들어  `by viewModels()`로 `this(fragment)` default lifecycle scope를 지정했다면 해당 fragment가 `onDestroyView`를 호출하고 난 후에 viewModel도 `onCleared`를 호출한다. 
