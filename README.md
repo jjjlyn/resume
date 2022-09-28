@@ -35,5 +35,3 @@
     - 소프트웨어 개발론: Agile
     - 형상관리: Git-flow
     - 툴: Slack, Jira, Notion, Github
-
-
