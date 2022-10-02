@@ -5,7 +5,7 @@
 
 ## 서버 구성
 ### 운영 환경
-원래 운영 환경은 Azure, 개발 환경은 AWS로 구축되었으나 Azure 구독료가 부담스러운 관계로 2022년 9월 13일 기준 운영까지 AWS로 주요 리소스를 이전하였습니다.
+원래 운영 환경은 Azure, 개발은 AWS로 구축되었으나 Azure 구독료가 부담스러운 관계로 2022년 9월 13일 기준 운영까지 AWS로 주요 리소스를 이전하였습니다.
 - Azure에서 사용하는 리소스(현재)
   - 스토리지 계정(Blob Service)
   - ~~정적 웹앱~~
@@ -18,13 +18,15 @@
   - RDS
   - Router53
 
-개발 환경만 구축된 AWS는 아래와 같은 구조로 VPC 내에 서브넷 한개로 구성되어 있습니다. 기존 서브넷으로는 내부 IP를 250개 정도 사용가능하여 개발 환경용으로는 충분하나 운영용으로는 부족할 수 있어 서브넷을 추가로 생성하였습니다. 
+개발 환경만 구축된 AWS는 아래와 같은 구조로 VPC 내에 서브넷 한개로 구성되어 있습니다. 기존 서브넷으로는 내부 IP를 250개 정도 사용가능하여 개발용으로는 충분하나 운영에서는 부족할 수 있어 서브넷을 추가로 생성하였습니다. (둘 다 퍼블릭 서브넷 입니다.)
 
-![개발환경 아키텍쳐](images/dev-env.png)
-
+![개발 아키텍쳐](images/dev-env.png)
 개발, 운영환경을 구분한 모습입니다.
 
-![운영환경 아키텍쳐](images/dev-rel-env.png)
+![운영 아키텍쳐](images/dev-rel-env.png)
+
+다음은 운영 환경 구조도 입니다.
+![운영 구조도](images/real-infra-architecture.png)
 
 전체 흐름은 하단의 조건을 성립해야 했습니다.
 - EC2, RDS 보안그룹 지정
@@ -39,6 +41,8 @@
 
 **보안그룹 지정**
 
+EC2 인바운드 보안그룹에는 접속하려는 IP, PORT에 대해서만 추가하면 됩니다. 예컨데 443(HTTP), 2376(도커 데몬 소켓), 22(SSH), 21(FTP) 등이 있습니다. IP는 모두 허용하도록 설정했습니다(0.0.0.0).</br>
+RDS 인바운드 보안그룹 설정에서 주의해야 할 사항이 있습니다. **EC2에서 RDS로의 접속을 허용할 때, 반드시 EC2의 내부 IP(외부 IP X)를 허용 가능한 IP로 지정해야 한다는 점입니다.** AWS VPC 설정 시 VPC 서브넷 전용 라우팅 테이블을 생성합니다. 라우팅 테이블은 VPC 내 서브넷 자원의 아웃바운드 트래픽을 특정 장소(local 혹은 인터넷)로 전달하는 역할을 합니다. 동일 서브넷의 서로 다른 자원 간의 통신은 라우팅 테이블을 거치지 않지만, 같은 VPC 권역에 있더라도 다른 서브넷의 자원을 요청한 경우에는 라우팅 테이블을 거치게 됩니다. VPC의 CIDL 블록 범위에 있는 10.0.0.0/16의 트래픽인 경우 local로, 그 외 모든 IP(0.0.0.0/0)는 인터넷 게이트웨이로 보냅니다. 만약 RDS의 인바운드 보안그룹에 EC2의 외부 IP를 등록하게 되면, 라우팅 테이블의 명시에 따라 인터넷 게이트웨이로 트래픽이 나갑니다. 이 경우 외부에서 RDS로 접근을 시도하는 것인데, RDS 보안그룹에서는 외부 트래픽을 차단하였기 때문에 접속이 되지 않습니다.
 
 **도메인 설정**
   - 도메인 호스팅 사이트에서 도메인 구매(고대디에서 구매)
@@ -49,21 +53,22 @@
   ![도메인 매핑 구조](images/route53_structure.png)
 
 **TLS 적용**
-  - 보안서버 인증서 구매 (Korea SSL에서 구매)
+
+보안서버 인증서 구매 (Korea SSL에서 구매)
 
 **VM Nginx 설정과 도커 환경 구축**
   - Nginx 포트 포워딩 (Nginx의 포트포워딩을 사용하면 내부망의 서버 정보를 외부로부터 은닉할 수 있음)
   - 도커 설정
 
-Nginx와 도커, 도커 컴포즈를 다운로드 합니다. 도커 설치 후에 도커 허브에서 registry 이미지를 `pull` 받고 컨테이너화 해야 합니다.
+Nginx와 도커를 설치한 후, 도커 허브에서 registry 이미지를 `pull` 받고 컨테이너화 해야 합니다.
 > docker private registy 사용 이유
 > 
 > 도커는 개발자가 만든 이미지를 공유하는 공식 저장소(docker hub)를 제공하고 있습니다. 그러나 사내 환경에서는 모든 이미지를 전체 도커 사용자에게 공유하지 않고 내부망에서만 관리해야 할 필요가 있습니다. 그럴 때 필요한 원격 저장소가 docker private registry입니다. 컨테이너 포트는 기본값 5000번으로 지정되어 있습니다.
 
-docker private registry도 Nginx에서 관리할 수 있도록 CNAME으로 추가해 주었습니다. (예: `docker.jjjlyn.io` -> `common.jjjlyn.io`로 매핑) Nginx에서 로컬호스트 5000번(편의상 도커 컨테이너 포트 기본값 5000번과 동일한 5000번으로 지정)으로 이동하도록 포트포워딩 설정도 해줍니다.
+docker private registry도 Nginx에서 관리할 수 있도록 CNAME으로 추가해 주었습니다. (예: `docker.jjjlyn.io` -> `common.jjjlyn.io`로 매핑)<br/>Nginx에서 로컬호스트 5000번(편의상 도커 컨테이너 포트 기본값 5000번과 동일한 5000번으로 지정)으로 이동하도록 포트포워딩 설정도 해줍니다.
 [참고 - 도커 외부통신 동작 원리](infra/how-docker-network-works.md)
 
-VM 도커 컨테이너는 CLI에서 `docker run`로 직접 띄우거나 `docker compose`를 이용하여 한꺼번에 띄울 수 있지만, 팀에서는 Azure Pipelines를 사용했습니다. 자세한 내용은 [Azure Pipelines로 CI/CD 자동화하기](infra/server-app-ci-cd.md)를 참고해주세요:)
+VM 도커 컨테이너는 CLI에서 `docker run`로 직접 띄우거나 `docker compose`를 이용하여 한꺼번에 띄울 수 있지만, 팀에서는 Azure Pipelines를 사용했습니다.</br>자세한 내용은 [Azure Pipelines로 CI/CD 자동화하기](infra/server-app-ci-cd.md)를 참고해주세요:)
 
 DNS Zone(AWS 기준 Route53)에서 추가한 서브 도메인에 대해 Nginx 포트 포워딩을 해 줍니다. 위에서 언급한 `docker.jjjlyn.io`를 예시로 들겠습니다.<br>
 
@@ -121,7 +126,7 @@ server {
                 proxy_set_header Host $http_host;
                 proxy_set_header X-Real-IP $remote_addr;
                 proxy_set_header X-Forwarded-Proto $scheme;
-                # docker.jjjlyn.io으로 들어온 요청은 내부망의 5000번으로 포트 포워딩
+                # docker.jjjlyn.io으로 들어온 요청은 로컬호스트 5000번으로 포트 포워딩
                 proxy_pass http://127.0.0.1:5000/;
                 proxy_redirect off;
         }
@@ -139,26 +144,30 @@ http {
 }
 ```
 
-이제 도커 허브에서 받아온 registry 이미지를 컨테이너화 해야 합니다. 외부에서 호스트 포트 5000번으로 요청이 들어올 경우 레지스트리 도커 컨테이너로 이를 전달해야 하기 때문에 `docker run` 실행 시 `p 5000:5000` 매개변수를 넣어 주어야 합니다. 추가로 Basic Authentication(보안 목적)을 위해 `htpasswd`도 적용합니다.
+이제 도커 허브에서 받아온 registry 이미지를 컨테이너화 해야 합니다. 외부에서 호스트 포트 5000번으로 요청이 들어올 경우 레지스트리 도커 컨테이너의 5000번 포트로 이를 전달해야 하기 때문에 `docker run` 실행 시 `-p 5000:5000` 매개변수를 넣어 주어야 합니다. 추가로 Basic Authentication(보안 목적)을 위해 `htpasswd`도 적용합니다.
 
-이렇게 Basic Authentication과 TLS를 모두 적용하고 나면, Azure Pipelines(외부)에서 `https://docker.jjjlyn.io` URL로 요청할 때만 Nginx를 통해 내부 포트 5000번으로 포트 포워딩 되기 때문에 docker private registry를 노출시킬 위험을 줄일 수 있습니다.
+이렇게 Basic Authentication과 TLS를 모두 적용하고 나면, Azure Pipelines(외부)에서 `https://docker.jjjlyn.io` URL로 요청할 때만 Nginx를 통해 로컬호스트 5000번으로 포트 포워딩 되기 때문에 docker private registry를 노출시킬 위험을 줄일 수 있습니다.
 
-어플리케이션 별 CI/CD 파이프라인 구축에 관해서 자세한 내용은 링크를 통해 확인하실 수 있습니다.
+<!-- 어플리케이션 별 CI/CD 파이프라인 구축에 관해서 자세한 내용은 링크를 통해 확인하실 수 있습니다.
 - [안드로이드 어플리케이션]()
 - [서버 어플리케이션]()
-- [정적 웹앱]()
+- [정적 웹앱]() -->
   
 ### 개발 환경
-운영에 비해 구조를 간소화 하였습니다. 이를테면 웹서버를 통한 포트포워딩은 과감히 생략하였습니다...
-
-<!-- ![dev-structure](https://user-images.githubusercontent.com/43571225/171211376-dbfde753-113d-45ae-ab96-3c4013182dd6.png) -->
-
-서비스 첫 배포에 앞서 개발과 운영환경을 분리해야 했습니다.
+서비스 첫 배포에 앞서 개발과 운영 환경을 분리해야 했습니다.
 Azure 가상머신과 비교하여 한화로 약 10만원 정도의 차이가 있고, 마침 지급받은 AWS 크레딧이 있어 AWS를 채택하였습니다.
 
 팀 내부에서만 사용하기에 트래픽이 거의 발생할 일이 없어
 - vCPU 4개, RAM 16GiB, SSD 64GiB의 일반적인 성능을 갖춘 가상머신을 선택했습니다.
 - RDS는 프리티어 조건으로 하였습니다.
+
+운영에 비해 구조를 간소화 하였습니다. 이를테면 웹서버를 통한 포트포워딩은 과감히 생략했습니다. 대신 AWS 보안그룹 인바운드 설정에서 API Gateway(Spring Cloud Gateway를 사용하였음)의 포트(예: 8000번)만을 허용하여 이를 통해 다른 컨테이너의 포트로 접근할 수 있도록 했습니다.
+<image width="894" alt="" src="images/dev-ec2-security-group.png"/>
+
+다음은 개발 환경 구조도 입니다.
+![개발 구조도](image/../images/dev-infra-architecture.png)
+
+<!-- ![dev-structure](https://user-images.githubusercontent.com/43571225/171211376-dbfde753-113d-45ae-ab96-3c4013182dd6.png) -->
 
 Azure Pipelines 빌드 환경에서 docker private registry에 접근하는 것은 외부에서 내부망으로 접속하는 것과 같습니다. 도커 환경에서는 보안상의 이유로 클라이언트와 원격지의 registry간 통신에서 https 프로토콜만을 허용합니다. 개발용으로 사설 TLS 인증서를 구매할 필요는 없어 자체 서명 인증서(Self-Signed Root CA)를 생성했습니다.
 
@@ -169,7 +178,6 @@ cd certs/
 openssl genrsa -des3 -out temp.key 2048
 ```
 <img width="894" alt="스크린샷 2022-06-04 오후 3 20 32" src="https://user-images.githubusercontent.com/43571225/171987925-284073f2-a383-4d0c-82cb-f40ffb6876e0.png">
-
 
 ```bash
 openssl req -new -key temp.key -out temp.csr
@@ -233,9 +241,9 @@ curl --user {레지스트리 ID}:{비밀번호} -X GET https://{외부 IP}:5000/
 
 위에서도 언급하였지만, 클라이언트와 호스트가 https 통신을 하려면 자체 서명 인증서를 클라이언트 환경의 `신뢰할 수 있는 인증서 목록`에 추가해야 합니다. 로컬에서 원격지의 registry에 접근하는 경우에는 로컬(클라이언트) 환경에 한번 적용한 후 계속 목록에 유지될 것입니다. 그러나 Azure Pipelines와 같이 매번 새로운 빌드 환경을 제공하는 경우에는 어떻게 해야 할까요?
 
-저는 자체 인증서 추가 로직을 CI/CD 파이프라인에 삽입했습니다. DockerFile에 삽입해도 됩니다. 자세한 내용은 [Azure Pipelines로 CI/CD 자동화하기](infra/server-app-ci-cd.md)에서 확인하실 수 있습니다.
+저는 자체 인증서 추가 로직을 CI/CD 파이프라인에 삽입했습니다. DockerFile에 추가해도 됩니다. 자세한 내용은 [Azure Pipelines로 CI/CD 자동화하기](infra/server-app-ci-cd.md)에서 확인하실 수 있습니다.
 
 ## 운영 중 이슈
-점점 쌓여가는 도커 blob images는 어떻게 지워야 할까요? reㄴgistry가 full일 경우를 대비하는 것이 좋습니다.
+점점 쌓여가는 도커 blob images는 어떻게 지워야 할까요? registry가 꽉 찬 경우 대처 방법을 공유합니다.
 
 [마법같은 docker image GC 스크립트](https://github.com/andrey-pohilko/registry-cli)
