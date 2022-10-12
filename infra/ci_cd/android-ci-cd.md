@@ -43,7 +43,7 @@ CI 스크립트에서 불러올 google-services.json 파일을 Azure DevOps Libr
     mv $(Agent.TempDirectory)/google-services.json $(Build.SourcesDirectory)/app/
 ```
 5. Azure DevOps Library에 미리 업로드한 xxx.jks 파일을 다운로드 합니다.(App Signing Key)
-![Android Secret Key](../images/ap-library-android-jks.png)s
+![Android Secret Key](../images/ap-library-android-jks.png)
 ```yml
 - task: DownloadSecureFile@1
   name: download_signing_file
@@ -243,7 +243,7 @@ steps:
 ### 무중단 배포(CD)
 개발과 운영 파이프라인을 분리하였습니다.</br> 
 개발 파이프라인에서는 빌드된 Artifacts를 슬랙 APK(apk) 공유 채널에 업로드 합니다.</br>
-운영 파이프라인은 앱 번들(aab)을 구글 플레이스토어 콘솔 내부 테스트에 업로드 합니다.
+운영 파이프라인은 앱 번들(aab)을 구글 플레이스토어 콘솔 내부 테스트에 업로드 합니다.</br>
 ![Azure Releases](/infra/images/ap-tab-releases.png)
 
 파이프라인을 새로 생성합니다.</br>
