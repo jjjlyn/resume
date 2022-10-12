@@ -96,8 +96,8 @@ CI 스크립트에서 불러올 google-services.json 파일을 Azure DevOps Libr
 ```
 10. 슬랙 APK 배포 채널에 새롭게 빌드한 APK 파일을 공유하기 위해 .aab -> .apk로 확장자를 변경해야 합니다. 이에 필요한 bundle tools 설치합니다.</br>
 [Bundletool 다운로드](https://marketplace.visualstudio.com/items?itemName=DamienAicheh.bundletool-tasks) (관리자의 승인이 있어야 다운로드가 완료됩니다.)</br>
-![Bundletool](../images/ap-extension-bundletool.png)
-다운로드를 완료하고 나면 Github 계정 설정에서 personal access token을 발급받아야 합니다.
+![Bundletool](../images/ap-extension-bundletool.png)</br>
+다운로드를 완료하고 나면 Github 계정 설정에서 personal access token을 발급받아야 합니다.</br>
 ![Github Personal Access Token](/infra/images/ap-personal-access-token.png)
 ```yml
 - task: InstallBundletool@1

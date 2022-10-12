@@ -244,6 +244,42 @@ curl --user {레지스트리 ID}:{비밀번호} -X GET https://{외부 IP}:5000/
 저는 자체 인증서 추가 로직을 CI/CD 파이프라인에 삽입했습니다. DockerFile에 추가해도 됩니다. 자세한 내용은 [Azure Pipelines로 CI/CD 자동화하기](infra/server-app-ci-cd.md)에서 확인하실 수 있습니다.
 
 ## 운영 중 이슈
-점점 쌓여가는 도커 blob images는 어떻게 지워야 할까요? registry가 꽉 찬 경우 대처 방법을 공유합니다.
+점점 쌓여가는 도커 blob images는 어떻게 지워야 할까요? private registry가 꽉 찬 경우 대처 방법을 공유합니다.
+[docker image GC 스크립트](https://github.com/andrey-pohilko/registry-cli)
 
-[마법같은 docker image GC 스크립트](https://github.com/andrey-pohilko/registry-cli)
+```bash
+docker pull anoxis/registry-cli
+```
+
+Private Registry에 지정한 이름이 `personal-registry`로 확인됩니다.
+![](/infra/images/docker-ps-private-registry.png)
+![](/infra/images/docker-inspect-private-registry.png)
+
+`personal-registry`로 registry-cli를 작동시킵니다.
+참고로 `--rm` 컨테이너가 종료되면 자동으로 삭제하라는 옵션입니다.
+```bash
+docker run --rm --link personal-registry anoxis/registry-cli -r http://personal-registry:5000
+```
+
+![Delete Legacy Images](/infra/images/docker-registry-gc.png)
+
+혹은 가상머신에 `registry.py`와 `requirements-build.txt`를 다운받아 python 파일을 실행하는 방법도 있습니다. vi 편집기로 문서 파일을 생성하여 복사 붙여넣기해도 됩니다. 
+![Registry CLI](/infra/images/registry-cli.png)
+
+registy.py를 실행할 수 있도록 권한을 부여합니다.
+```bash
+chmod 755 registry.py
+```
+
+의존성을 추가합니다.
+```bash
+sudo pip install -r requirements-build.txt
+```
+
+오래된 이미지를 삭제합니다.
+```bash
+./registry.py -l user:pass -r http://localhost:5000 --delete --num 5
+```
+
+
+
