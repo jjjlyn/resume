@@ -1,8 +1,8 @@
 # 안드로이드 어플리케이션 CI/CD 파이프라인 구축
 
-[targetSdkVersion & compileSdkVersion 살펴보기](https://medium.com/google-developers/picking-your-compilesdkversion-minsdkversion-targetsdkversion-a098a0341ebd#.bpqsg4ili)
+빌드와 배포용 도구로 **Azure Pipelines**를 사용합니다.
 
-빌드와 배포용 도구로 Azure Pipelines를 사용합니다.
+## 무중단 통합(CI)
 1. develop 브랜치로 코드가 푸시되면 트리거되도록 설정합니다.
 ```yml
 trigger:
@@ -11,7 +11,8 @@ trigger:
       - develop
 ```
 2. platform-tools 31.0.3에서 오류가 나서 cmd line에서 31.0.1로 변경했습니다.</br>
-`$ANDROID_HOME`은 Azure에서 사전에 지정해 놓은 환경변수로 **/Users/runner/Library/Android/sdk/**의 경로가 지정되어 있습니다.
+(이 과정은 일반적인 CI 환경에서는 필요없는 절차입니다.)
+`$ANDROID_HOME`은 Azure에서 사전에 지정해 놓은 환경변수로 /Users/runner/Library/Android/sdk/의 경로가 지정되어 있습니다.
 ```yml
 - script: |
       rm -rf $ANDROID_HOME/platform-tools/ && \
@@ -24,8 +25,8 @@ trigger:
 3. Azure Pipelines Library에 업로드한 google-services.json 파일을 다운로드 합니다.</br>
 CI 스크립트에서 불러올 google-services.json 파일을 Azure DevOps Library에 미리 업로드 하였습니다.
 
-![Azure Pipelines Library](/infra/images/azure_pipelines_tab_library.png)
-![Google Service Json](/infra/images/secret_google_json.png)
+![Azure Pipelines Library](/infra/images/ap-tab-library.png)
+![Google Service Json](/infra/images/ap-library-google-services.png)
 ```yml
 - task: DownloadSecureFile@1
   name: download_google_services_json
@@ -35,15 +36,14 @@ CI 스크립트에서 불러올 google-services.json 파일을 Azure DevOps Libr
     retryCount: 5
 ```
 4. google-services.json을 작업 디렉토리로 이동합니다.
-`$(Agent.TempDirectory)`는 Azure에서 지정한 default 임시 디렉토리이며, 실제 경로는 **/Users/runner/work/_temp/**입니다.
-`$(Build.SourcesDirectory)`도 Azure에서 지정한 default 작업 디렉토리이며, 실제 경로는 **/Users/runner/work/1/s/**입니다.
+`$(Agent.TempDirectory)`는 Azure에서 지정한 default 임시 디렉토리이며, 실제 경로는 /Users/runner/work/_temp/입니다.
+`$(Build.SourcesDirectory)`도 Azure에서 지정한 default 작업 디렉토리이며, 실제 경로는 /Users/runner/work/1/s/입니다.
 ```yml
 - script: |
     mv $(Agent.TempDirectory)/google-services.json $(Build.SourcesDirectory)/app/
 ```
 5. Azure DevOps Library에 미리 업로드한 xxx.jks 파일을 다운로드 합니다.(App Signing Key)
-
-![Signing Key](/infra/images/secret_app_signing_key.png)
+![Android Secret Key](../images/ap-library-android-jks.png)s
 ```yml
 - task: DownloadSecureFile@1
   name: download_signing_file
@@ -68,14 +68,14 @@ CI 스크립트에서 불러올 google-services.json 파일을 Azure DevOps Libr
       sonarQubeRunAnalysis: false
 ```
 7. App bundle에 Signing (google play store console에 등록한 jks 전용)
-// 미완성
 ```yml
  - task: CmdLine@2
    displayName: Signing and aligning AAB file(s)
    inputs:
       script: jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore $(Agent.TempDirectory)/hayd_android.jks -storepass $(KEYSTORE-PASSWORD) -keypass $(KEY-PASSWORD) $(system.defaultworkingdirectory)/app/build/outputs/bundle/productionRelease/app-production-release.aab $(KEY-ALIAS)
 ```
-8. Signing 완료된 App bundle 파일을 작업 디렉토리로 복사합니다.
+8. Signing 완료된 App bundle 파일을 작업 디렉토리로 복사합니다.</br>
+참고로 여기서 `$(system.defaultworkingdirectory)`는 `$(Build.SourcesDirectory)`와 동일한 경로 입니다. (당시 대체 왜 다르게 쓴건지는 잘 모르겠습니다.) 복사는 **SourceFolder -> TargetFolder**로 이루어집니다.
 ```yml
  - task: CopyFiles@2
    displayName: Copy AAB file(s)
@@ -94,7 +94,11 @@ CI 스크립트에서 불러올 google-services.json 파일을 Azure DevOps Libr
     artifact: release-aab
     publishLocation: pipeline
 ```
-10. 슬랙 APK 배포 채널에 APK 파일을 공유하기 위해 .abb -> .apk로 확장자를 변경해야 합니다. 이에 필요한 bundle tools 설치합니다.
+10. 슬랙 APK 배포 채널에 새롭게 빌드한 APK 파일을 공유하기 위해 .aab -> .apk로 확장자를 변경해야 합니다. 이에 필요한 bundle tools 설치합니다.</br>
+[Bundletool 다운로드](https://marketplace.visualstudio.com/items?itemName=DamienAicheh.bundletool-tasks) (관리자의 승인이 있어야 다운로드가 완료됩니다.)</br>
+![Bundletool](../images/ap-extension-bundletool.png)
+다운로드를 완료하고 나면 Github 계정 설정에서 personal access token을 발급받아야 합니다.
+![Github Personal Access Token](/infra/images/ap-personal-access-token.png)
 ```yml
 - task: InstallBundletool@1
   displayName: Install bundle tool
@@ -102,13 +106,15 @@ CI 스크립트에서 불러올 google-services.json 파일을 Azure DevOps Libr
     username: $(github-username)
     personalAccessToken: $(github-personal-access-token)
 ```
-11. App bundle을 APK 확장자로 변환하는 작업 입니다.(여기서도 signing 작업을 위해 signing key를 파라미터로 전달합니다.)
+11. App bundle을 APK 확장자로 변환하는 작업입니다.(여기서도 signing 작업을 위해 keystore 정보를 파라미터로 전달합니다.)
+Azure Pipelines Library > Variable group에 Signing Key(**keystorePassword, keystoreAlias, keystoreAliasPassword**)를 미리 업로드 하였습니다. xxx.jks 파일은 앞에서 다운로드 하였으므로, **keystoreFilePath**에 파일경로를 기입합니다.
+![Android Secret Key](../images/ap-library-android-keystore.png)
 ```yml
  - task: AabConvertToUniversalApk@1
    displayName: Convert AAB to APK
    inputs:
       aabFilePath: $(Build.SourcesDirectory)/release/app-production-release.aab
-      keystoreFilePath: $(Agent.TempDirectory)/hayd_android.jks
+      keystoreFilePath: $(Agent.TempDirectory)/xxx.jks
       keystorePassword: $(KEYSTORE-PASSWORD)
       keystoreAlias: $(KEY-ALIAS)
       keystoreAliasPassword: $(KEY-PASSWORD)
@@ -125,7 +131,7 @@ CI 스크립트에서 불러올 google-services.json 파일을 Azure DevOps Libr
     publishLocation: pipeline
 ```
 
-**최종 코드**
+**전체 스크립트**
 ```yml
 # Android
 # Build your Android project with Gradle.
@@ -234,121 +240,34 @@ steps:
       publishLocation: pipeline
 ```
 
-**Gradle 설정**
-```gradle
-Plugin.metaClass.isAndroidApp = {-> delegate.class.getCanonicalName() == "com.android.build.gradle.AppPlugin" }
-Plugin.metaClass.isDynamicFeature = {-> delegate.class.getCanonicalName() == "com.android.build.gradle.DynamicFeaturePlugin" }
-Plugin.metaClass.isAndroidLibrary = {-> delegate.class.getCanonicalName() == "com.android.build.gradle.LibraryPlugin" }
+### 무중단 배포(CD)
+개발과 운영 파이프라인을 분리하였습니다.</br> 
+개발 파이프라인에서는 빌드된 Artifacts를 슬랙 APK(apk) 공유 채널에 업로드 합니다.</br>
+운영 파이프라인은 앱 번들(aab)을 구글 플레이스토어 콘솔 내부 테스트에 업로드 합니다.
+![Azure Releases](/infra/images/ap-tab-releases.png)
 
-buildscript {
-    apply from: 'versions.gradle'
-    apply from: 'privates.gradle'
-    repositories {
-        google()
-        mavenCentral()
+파이프라인을 새로 생성합니다.</br>
+![Create Pipelines](/infra/images/ap-pipelines-creation.png)
+ 
+Artifact를 추가합니다.
+![Setting Android Artifacts](/infra/images/ap-artifact-creation.png)
 
-        maven { url "https://www.jitpack.io" }
-    }
+**슬랙 채널에 APK 업로드**
 
-    dependencies {
-        classpath 'com.google.gms:google-services:4.3.10'
-        classpath "com.android.tools.build:gradle:7.0.3"
-        classpath deps.kotlin.plugin
-        classpath deps.dagger.hilt_plugin
-        classpath deps.navigation.safe_args_plugin
-        classpath deps.firebase.remote_config
-        classpath deps.firebase.perf_plugin  // Performance Monitoring plugin
-        classpath deps.firebase.crashlytics_plugin
-        classpath 'com.google.android.gms:oss-licenses-plugin:0.10.4'
-    }
+슬랙 third party 앱을 이용하려면 Extensions를 미리 다운받아야 합니다.(앞서 Bundletool을 내려받은 방식과 같습니다.)
+![Slack Extension](/infra/images/ap-stage-slack-1.png)
 
-}
+발급받은 슬랙 API 키를 Azure Pipelines Library에 추가하여 가져옵니다.
+![Slack API Key](../images/ap-library-slack-key.png)
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
+![Slack Stage](/infra/images/ap-stage-slack-2.png)
 
-        maven { url "https://jitpack.io" }
-        maven { url 'https://maven.google.com/' }
-        maven { url 'https://devrepo.kakao.com/nexus/content/groups/public/' }
-    }
+빌드된 APK를 슬랙에 업로드할 파일로 지정합니다.
+![Slack Stage 2](../images/ap-stage-slack-3.png)
 
-    plugins.whenPluginAdded {
-        if (it.isAndroidApp() || it.isAndroidLibrary() || it.isDynamicFeature()) {
-            android {
-                flavorDimensions "flavors"
-                productFlavors {
-                    development {
-                        dimension "flavors"
-                    }
-                    production {
-                        dimension "flavors"
-                    }
-                }
+**구글 플레이스토어 콘솔 내부 테스트 버전 배포**
+ㄴ
+구글 플레이스토어 콘솔 third party 앱을 이용하려면 Extensions를 미리 다운받아야 합니다.(앞서 Bundletool과 슬랙을 내려받은 방식과 같습니다.)
+![Google Play Console Extension](/infra/images/ap-stage-google-play-store-1.png)
 
-                compileSdkVersion build_versions.compile_sdk
-                buildToolsVersion build_versions.build_tools
-
-                defaultConfig {
-                    minSdkVersion build_versions.min_sdk
-                    targetSdkVersion build_versions.target_sdk
-                    versionCode build_versions.version_code
-                    versionName build_versions.version_name
-
-                    buildConfigField("String", "kakaoAppKey", "\"${privates.kakao_app_key}\"")
-                    buildConfigField("String", "googleWebClientKey", "\"${privates.google_web_client_key}\"")
-                    buildConfigField("String", "apiEndPoint", "\"${privates.api_end_point}\"")
-                    buildConfigField("String", "clientSecretKey", "\"${privates.client_secret_key}\"")
-                    buildConfigField("String", "iamportUserCode", "\"${privates.iamport_user_code}\"")
-
-                    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-                    multiDexEnabled true
-                }
-
-                buildFeatures {
-                    dataBinding true
-                    viewBinding true
-//                    compose true
-                }
-
-                composeOptions {
-//                    kotlinCompilerExtensionVersion compose_version
-                }
-
-                compileOptions {
-                    sourceCompatibility JavaVersion.VERSION_11
-                    targetCompatibility JavaVersion.VERSION_11
-                }
-            }
-
-            dependencies {
-//                implementation deps.compose.runtime
-//                implementation deps.compose.ui
-//                implementation deps.compose.foundation
-//                implementation deps.compose.foundation_layout
-//                implementation deps.compose.material
-//                implementation deps.compose.livedata
-//                implementation deps.compose.tooling
-//                implementation deps.compose.theme_adapter
-            }
-        }
-    }
-
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.AbstractKotlinCompile).all {
-        kotlinOptions.freeCompilerArgs += ["-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi"]
-    }
-
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_11.toString()
-//            useIR = true
-        }
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-```
-**배포**
+![Google Play Console Stage](/infra/images/ap-stage-google-play-store-2.png)
