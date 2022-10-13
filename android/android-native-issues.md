@@ -26,4 +26,4 @@
 11. Gradle 설정 (feat. flavor)
 12. 프로가드
 13. 암호화
-14. 무중단 배포 작업
+14. [무중단 통합, 배포 작업](/infra/ci_cd/android-ci-cd.md)
