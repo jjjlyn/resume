@@ -1,11 +1,14 @@
 # 서버 어플리케이션 CI/CD 파이프라인 구축
 ## Dockerfile
-전역변수를 설정합니다.
+Dockerfile이란 docker가 기본적으로 제공하는 이미지를 이용하여 커스텀 이미지를 생성할 수  있는 스크립트 파일 입니다.
+
+먼저 전역변수를 설정합니다.
 ```Dockerfile
 ARG port=3000
 ARG binary=product-api
 ```
-빌드 환경을 구축합니다.
+**빌드 환경을 구축합니다.**
+
 알파인 리눅스(alpine linux)는 도커 컨테이너 OS로 많이 사용되는 초경량화된 리눅스 배포판 입니다.
 ```Dockerfile
 FROM golang:1.16.2-alpine3.13 as builder
@@ -50,17 +53,30 @@ RUN make get-dependencies
 `go build`와 동일합니다.
 ```Dockerfile
 RUN make build
-```Dockerfile
+```
 
-배포 환경을 구축합니다.
+**배포 환경을 구축합니다.**
 ```Dockerfile
 FROM alpine:3.10 as distribution
 ```
 
-ARG는 빌드 단계에서만 유효합니다. 그러므로 새로운 단계인 distribution에서 port, binary ARG를 갱신해야 합니다. 
+ARG는 각 단계(stage)에서만 유효합니다.</br>
+그러므로 새로운 단계인 distribution에서 port, binary ARG를 갱신해야 합니다. 
 ```Dockerfile
 ARG port
 ARG binary
+```
+
+패키지 업데이트 및 TLS를 위한 ca-certificates를 설치합니다.
+```Dockerfile
+RUN apk update && apk upgrade && \
+    apk --update add bash ca-certificates
+```
+
+컨테이너 내부에서 사용할 수 있는 변수로 PORT와 binary를 지정합니다.
+```Dockerfile
+ENV PORT=$port
+ENV binary=$binary
 ```
 
 `cd app/`과 동일합니다. 도커 컨테이너 OS의 /app 디렉토리로 이동합니다.
@@ -73,17 +89,17 @@ WORKDIR /app
 COPY --from=builder /app/${binary} /app
 ```
 
-컨테이너의 특정 포트를 열어주는 명령어 입니다.(container listen to traffic on specific port)
+컨테이너의 특정 포트를 열어주는 명령어 입니다.(container listen to traffic on specific port)</br>
 `EXPOSE` 명령어가 의미 있으려면, `docker run`의 **-p** 옵션으로 호스트 컴퓨터의 특정 포트를 해당 컨테이너의 특정 포트로 포워딩 해주어야 합니다. 
 ```Dockerfile
 EXPOSE ${PORT}
 ```
 
-`docker container run` 시 실행됩니다.
 `docker exec -it ${컨테이너 ID} bash`로 컨테이너 접속 시 `pwd`(현재 위치 장소가 /app)입니다.
 ```Dockerfile
 CMD /app/${binary}
 ```
+이로써 `docker container run` 시 실행되는 최종 이미지가 완성됩니다.
 
 **전체 파일**
 ```Dockerfile
@@ -128,12 +144,8 @@ WORKDIR /app
 
 COPY --from=builder /app/${binary} /app
 
-# product-api image가 컨테이너화 될 때, 이 컨테이너의 특정 포트를 열어주는 명령어 입니다.(container listen to traffic on specific port)
-# EXPOSE 명령어가 의미 있으려면, docker run의 -p 옵션으로 호스트 컴퓨터의 특정 포트를 해당 컨테이너의 특정 포트로 포워딩 해주어야 합니다. 
 EXPOSE ${PORT}
 
-# docker container run 시 실행됨
-# docker exec -it ${컨테이너 ID} bash로 컨테이너 접속 시 pwd(현재 위치 장소가 /app임)
 CMD /app/${binary}
 ```
 
@@ -179,4 +191,4 @@ stages:
 
 ![](/infra/images/ap_service_connection_add_private_registry.png)
 
-![](../images/ap_service_connection_private_registry_settings.png)
+![](/infra/images/ap_service_connection_private_registry_settings.png)
