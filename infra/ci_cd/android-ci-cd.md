@@ -266,7 +266,7 @@ Artifact를 추가합니다.
 ![Slack Stage 2](../images/ap-stage-slack-3.png)
 
 **구글 플레이스토어 콘솔 내부 테스트 버전 배포**
-ㄴ
+
 구글 플레이스토어 콘솔 third party 앱을 이용하려면 Extensions를 미리 다운받아야 합니다.(앞서 Bundletool과 슬랙을 내려받은 방식과 같습니다.)
 ![Google Play Console Extension](/infra/images/ap-stage-google-play-store-1.png)
 
