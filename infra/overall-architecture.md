@@ -68,7 +68,7 @@ Nginx와 도커를 설치한 후, 도커 허브에서 registry 이미지를 `pul
 docker private registry도 Nginx에서 관리할 수 있도록 CNAME으로 추가해 주었습니다. (예: `docker.jjjlyn.io` -> `common.jjjlyn.io`로 매핑)<br/>Nginx에서 로컬호스트 5000번(편의상 도커 컨테이너 포트 기본값 5000번과 동일한 5000번으로 지정)으로 이동하도록 포트포워딩 설정도 해줍니다.
 [참고 - 도커 외부통신 동작 원리](infra/how-docker-network-works.md)
 
-VM 도커 컨테이너는 CLI에서 `docker run`로 직접 띄우거나 `docker compose`를 이용하여 한꺼번에 띄울 수 있지만, 팀에서는 Azure Pipelines를 사용했습니다.</br>자세한 내용은 [Azure Pipelines로 CI/CD 자동화하기](infra/server-app-ci-cd.md)를 참고해주세요:)
+VM 도커 컨테이너는 CLI에서 `docker run`로 직접 띄우거나 `docker compose`를 이용하여 한꺼번에 띄울 수 있지만, 팀에서는 Azure Pipelines를 사용했습니다.</br>자세한 내용은 [Azure Pipelines로 CI/CD 자동화하기](/infra/ci_cd/server-app-ci-cd.md)를 참고해주세요:)
 
 DNS Zone(AWS 기준 Route53)에서 추가한 서브 도메인에 대해 Nginx 포트 포워딩을 해 줍니다. 위에서 언급한 `docker.jjjlyn.io`를 예시로 들겠습니다.<br>
 

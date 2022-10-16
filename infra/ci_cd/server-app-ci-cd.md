@@ -61,8 +61,8 @@ RUN make build
 FROM alpine:3.10 as distribution
 ```
 
-ARG는 각 단계(stage)에서만 유효합니다.</br>
-그러므로 새로운 단계인 distribution에서 port, binary ARG를 갱신해야 합니다. 
+ARG는 각 단계(stage) 범위 내에서만 유효합니다.</br>
+그러므로 새로운 단계인 distribution에서는 port, binary ARG를 갱신해야 합니다. 
 ```Dockerfile
 ARG port
 ARG binary
@@ -196,6 +196,42 @@ CMD java -jar /app/app.jar
 
 ![Private Registry Service Connections Settings](/infra/images/ap_service_connection_private_registry_settings.png)
 
+**tag**와 **repositoryName** 변수를 설정합니다.</br>
+**tag**는 Docker Build Image ID이고,</br>
+**repositoryName**은 {Github User ID}/{Github Repository Name}로 보면 됩니다.
+```
+{private registry IP or 도메인}/{Github User ID}/{Github Repository Name}:{Docker Build Image ID}
+```
+e.g. `docker.jjjlyn.io/jjjlyn/product-api:3357`</br>
+- tag: 3357
+- repositoryName = jjjlyn/product-api
+- 최종 태그: docker.jjjlyn.io/jjjlyn/product-api:3357
+```yml
+variables:
+  tag: '$(Build.BuildId)'
+  repositoryName: '$(Build.Repository.Name)'
+```
+
+`Docker@2` 태스크에서 최종 태그에 prefix로, 앞에서 언급한</br>
+Private Registry IP 혹은 도메인 + Github User ID + Github Repository Name이 붙습니다. 맨 마지막에 tag 번호가 붙습니다.
+```yml
+steps:
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'Private Registry'
+      repository: $(repositoryName)
+      command: 'buildAndPush'
+      Dockerfile: '**/Dockerfile'
+      tags: |
+        $(tag)
+```
+
+최종 이미지는 private registry에 자동으로 push 됩니다.
+```bash
+/usr/bin/docker images
+/usr/bin/docker push docker.jjjlyn.io/jjjlyn/product-api:3357
+```
+
 **CI 스크립트**
 ```yml
 # Starter pipeline
@@ -215,7 +251,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  tag: '$(Build.BuildId)' #"`git rev-parse --short HEAD`"
+  tag: '$(Build.BuildId)'
   repositoryName: '$(Build.Repository.Name)'
 
 stages:
@@ -279,7 +315,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  tag: '$(Build.BuildId)' #"`git rev-parse --short HEAD`"
+  tag: '$(Build.BuildId)'
   repositoryName: '$(Build.Repository.Name)'
 
 stages:
@@ -313,7 +349,28 @@ stages:
 ```
 
 ## 지속적 배포 (CD)
-**환경변수 지정**
+CI 파트에서 언급한 바로 `$(Build.Repository.Name)`은 {Github User ID}/{Github Repository Name}이었습니다.(e.g. jjjlyn/product-api)</br>
+**CONTAINER_NAME**을 `product-api-cont`로 선언하기 위해 shell에서 패턴을 사용하여 기존 변수(**origin_repo**)를 대체합니다.
+${origin_repo#*/}에서 #는 왼쪽부터 문자열을 제거하라는 의미입니다.</br>
+*/는 ''(공백)부터 /까지의 패턴이 일치하는 경우를 찾습니다. jjjlyn/product-api에서는 jjjlyn/이 패턴과 일치하므로 이를 왼쪽부터 제거하면 product-api만 남게 됩니다. 즉 **CONTAINER_NAME**은 product-api가 됩니다.</br>
+자른 문자열에 -cont를 붙이면 product-api-cont가 완성됩니다. 이를 다시 **CONTAINER_NAME**에 대입합니다.
+```bash
+export origin_repo='$(Build.Repository.Name)'
+export CONTAINER_NAME=${origin_repo#*/}-cont
+```
+
+현재 예시는 그렇지 않지만, 실제 팀에서 사용하는 Github User ID에 대문자였어서 **IMAGE_NAME** 선언 시 대문자를 모두 소문자로 변환해 주었습니다.
+```bash
+export IMAGE_NAME=${origin_repo,,}
+```
+
+[Set Variables](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/set-variables-scripts?view=azure-devops&tabs=bash)에 따라 task.setvariable에 **CONTAINER_NAME**과 **IMAGE_NAME**을 추가합니다. 이로써 이후 태스크에서 $(variable) 형식의 매크로 변수를 사용할 수 있습니다.
+```bash
+echo "##vso[task.setvariable variable=CONTAINER_NAME]${CONTAINER_NAME}"
+echo "##vso[task.setvariable variable=IMAGE_NAME]${IMAGE_NAME}"
+```
+
+**환경변수 지정 전체 코드**
 ```bash
 export origin_repo='$(Build.Repository.Name)'
 export CONTAINER_NAME=${origin_repo#*/}-cont
@@ -324,12 +381,15 @@ echo ${origin_repo}
 echo ${CONTAINER_NAME}
 echo ${IMAGE_NAME}
 
-# 위와 같이 CONTAINER_NAME, IMAGE_NAME 조작해서 azure vso 변수로 지정합니다
 echo "##vso[task.setvariable variable=CONTAINER_NAME]${CONTAINER_NAME}"
 echo "##vso[task.setvariable variable=IMAGE_NAME]${IMAGE_NAME}"
 ```
 
 **Docker Pull & Retagging & Push**
+
+CI 파트에서 Azure Pipelines을 통해 private registry에 최종 빌드된 이미지를 푸시하였습니다. 이를 pull을 통해 가져옵니다.</br>
+다음은 retagging 과정입니다. $(Build.BuildId)를 latest로 바꿉니다.</br> 
+태그 완료된 이미지를 다시 푸시합니다.
 ```bash
 docker pull docker.jjjlyn.io/$(IMAGE_NAME):$(Build.BuildId)
 
@@ -339,17 +399,21 @@ docker push docker.jjjlyn.io/$(IMAGE_NAME):latest
 ```
 
 **Pull Latest Image**
-```bash
-docker pull localhost:5000/$(IMAGE_NAME):latest
-```
+앞서 latest로 바꾼 가장 최신 이미지를 불러옵니다.
+이를 위해서 Azure Service Connections에 호스트 VM을 미리 등록해야 합니다.</br>
+Service Connections를 이용하여 호스트 환경에 접속합니다.</br>
+호스트 환경에 로그인한 이후로는 localhost:5000으로 private registry에 직접 접근할 수 있습니다.
+![Pull Latest Image](/infra/images/ap-cd-pull-latest-image.png)
 
 **Stop, Remove Container**
+기존 실행 중인 컨테이너를 내리고 삭제합니다.
 ```bash
 docker stop $(CONTAINER_NAME)
 docker rm $(CONTAINER_NAME)
 ```
 
 **Run Container**
+새롭게 빌드된 이미지를 컨테이너화 합니다.
 ```bash
 # --net $(CONTAINER_NET): kong-net으로 묶여 있습니다
 docker run -d -e port=$(port) -p {HOST Port}:{Docker Container Port} --net $(CONTAINER_NET) --name $(CONTAINER_NAME) --restart unless-stopped localhost:5000/$(IMAGE_NAME):latest
