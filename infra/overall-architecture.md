@@ -66,7 +66,7 @@ Nginx와 도커를 설치한 후, 도커 허브에서 registry 이미지를 `pul
 > 도커는 개발자가 만든 이미지를 공유하는 공식 저장소(docker hub)를 제공하고 있습니다. 그러나 사내 환경에서는 모든 이미지를 전체 도커 사용자에게 공유하지 않고 내부망에서만 관리해야 할 필요가 있습니다. 그럴 때 필요한 원격 저장소가 docker private registry입니다. 컨테이너 포트는 기본값 5000번으로 지정되어 있습니다.
 
 docker private registry도 Nginx에서 관리할 수 있도록 CNAME으로 추가해 주었습니다. (예: `docker.jjjlyn.io` -> `common.jjjlyn.io`로 매핑)<br/>Nginx에서 로컬호스트 5000번(편의상 도커 컨테이너 포트 기본값 5000번과 동일한 5000번으로 지정)으로 이동하도록 포트포워딩 설정도 해줍니다.
-[참고 - 도커 외부통신 동작 원리](infra/how-docker-network-works.md)
+[참고 - 도커 외부통신 동작 원리](/infra/how-docker-network-works.md)
 
 VM 도커 컨테이너는 CLI에서 `docker run`로 직접 띄우거나 `docker compose`를 이용하여 한꺼번에 띄울 수 있지만, 팀에서는 Azure Pipelines를 사용했습니다.</br>자세한 내용은 [Azure Pipelines로 CI/CD 자동화하기](/infra/ci_cd/server-app-ci-cd.md)를 참고해주세요:)
 
