@@ -30,7 +30,7 @@
 - 이화여자대학교 커뮤니케이션 미디어학 (2015.03 - 2020.08)
 
 ### 외부 활동
-- 사이드 프로젝트 [링크](https://github.com/jjjlyn/moc-android) (2021.11 - 현재)
+- 사이드 프로젝트 [링크](https://github.com/jjjlyn/moc-android) (2021.11 - 현재 진행 중)
 - 자바 스터디 (2021.05 - 2021.08)
 - 사이드 프로젝트 동아리 DDD 5기 (2021.03 - 2021.08)
   - 발표자료 [링크](https://github.com/jjjlyn/DDD-5-Android-Session)

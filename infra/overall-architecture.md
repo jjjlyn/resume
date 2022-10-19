@@ -279,7 +279,7 @@ chmod 755 registry.py
 sudo pip install -r requirements-build.txt
 ```
 
-오래된 이미지를 삭제합니다.(5개 이미지 삭제 옵션을 준 예시입니다.)
+오래된 이미지를 삭제합니다. (5개 이미지 삭제 옵션을 준 예시입니다.)
 ```bash
 ./registry.py -l user:pass -r http://localhost:5000 --delete --num 5
 ```

@@ -348,7 +348,7 @@ stages:
                 $(tag)
 ```
 
-## 지속적 배포 (CD)
+## 무중단 배포 (CD)
 CI 파트에서 언급한 바로 `$(Build.Repository.Name)`은 {Github User ID}/{Github Repository Name}이었습니다.(e.g. jjjlyn/product-api)</br>
 **CONTAINER_NAME**을 `product-api-cont`로 선언하기 위해 shell에서 패턴을 사용하여 기존 변수(**origin_repo**)를 대체합니다.
 ${origin_repo#*/}에서 #는 왼쪽부터 문자열을 제거하라는 의미입니다.</br>
