@@ -1,12 +1,14 @@
 # Resume
 
 ### 소개
+숲과 나무 모두를 보려고 노력하는 개발자 입니다.
+
 헬스케어 관련 스타트업에서 2년간 소프트웨어 개발자로 일했습니다.</br>
-안드로이드 앱 개발(네이티브)을 주로 하고 있습니다.</br>
+안드로이드 앱(네이티브)을 주로 다룹니다.</br>
 하단 목록(링크)는 개발 과정에서 발생한 이슈 해결 과정 혹은 특정 기술에 관한 개인적인 이해를 정리한 자료입니다.
 
 [안드로이드 전체 바로가기](/android/)
-- [AOSP]()
+- [아키텍처](/android/architecture.md)
 - [트러블 슈팅 기록](/android/android-native-issues.md)
   - [커스텀 뷰](/android/android-native-issues.md)
   - [RecyclerView]()
