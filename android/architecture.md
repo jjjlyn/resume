@@ -20,6 +20,13 @@
 (미완)
 
 ### Init
+커널은 어플리케이션 실행 환경을 조성
+시스템 어플리케이션과 라이브러리는 안드로이드 시스템 환경을 조성
+가장 위에 안드로이드 유저 어플리케이션이 있음
+그러나 가장 기본은 System Startup이다.
+
+리눅스 부팅 작업의 마지막 과정에서 진행되는 작업은 커널의 init 실행. init은 유저모드에서 가장 처음 실행되는 어플리케이션으로서, virtual memory와 file system을 할당받고, 하드웨어와 직접적인 통신이 불가능.
+Bionic is derived from the BSD Unix(libc)
 
 (미완)</br>
 
@@ -77,7 +84,7 @@ ART도 Dalvik VM과 마찬가지로 DEX를 매개언어(Intermediate Language)�
 ART에서 DEX를 바이너리 파일로 변환하는 도구를 *dex2oat*라고 합니다. *dex2oat*는 여러 하드웨어에서 돌아갈 수 있도록 각종 버전을 제공하고 있고, 이는 안드로이드 기기에 OS의 한 부분으로서 설치됩니다. *dex2oat*가 각 하드웨어에 맞추어 바이너리 코드로 컴파일 해주기 때문에 DEX는 하드웨어 플랫폼을 추가적으로 신경 쓸 필요가 없습니다. 즉 ART는 이 도구를 사용함으로써, 매개언어의 기본 철학인 이식성을 보장합니다.
 
 ### Binder IPC Proxy
-
+![](/android/images/binder.png)
 (미완)
 
 ### 참고
