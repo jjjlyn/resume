@@ -17,6 +17,7 @@
   - etc...
 
 [인프라 전체 바로가기](/infra/)
+  - [개발 환경 구축](/infra/overall-architecture.md)
   - [CI/CD](/infra/ci_cd/)
     - [안드로이드](/infra/ci_cd/android-ci-cd.md)
     - [서버 어플리케이션](/infra/ci_cd/server-app-ci-cd.md)
@@ -25,6 +26,8 @@
 ### 경력
 - (주)[헤이드컴퍼니](https://www.hayd.app/) (2020.08 - 2022.09)
   - 안드로이드 앱 1인 개발 > [앱 바로가기](https://play.google.com/store/apps/details?id=app.hayd.android)
+  - 백엔드 API 개발 · 유지보수
+  - 인프라 관리
 - (주)이썸테크 (2020.01 - 2020.07)
 - (주)이썸테크 농정원 베트남 NAIS 외주 개발 (2019.07 - 2019.12)
   
