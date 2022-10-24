@@ -87,4 +87,9 @@ ART에서 DEX를 바이너리 파일로 변환하는 도구를 *dex2oat*라고 �
 - [Android Framework - 네이버](https://m.blog.naver.com/PostList.naver?blogId=bl2019&categoryName=an..%C2%A0framework&categoryNo=8&logCode=0)
 - [안드로이드 어플리케이션이 실행되기까지 - 티스토리](https://sanseolab.tistory.com/32)
 
-**본 문서에서 출처를 명시하지 않은 첨부파일은 피그마로 직접 제작한 작업물입니다. 2차 가공, 공유 등을 하여도 상관없으나 *내용이 틀릴 수도 있으므로* 권장하지 않습니다. 향후 틀린 내용에 대해서는 책임을 지지 않습니다.**
+</br>
+</br>
+
+**본 문서에서 출처를 명시하지 않은 첨부파일은 피그마로 직접 제작한 작업물입니다.</br> 
+2차 가공, 공유 등을 하여도 상관 없으나 *내용에 오류가 있을 수 있으므로* 권장하지 않습니다. </br>
+잘못된 내용에 대해서는 책임을 지지 않습니다.**
