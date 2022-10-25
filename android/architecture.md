@@ -12,12 +12,12 @@
 안드로이드는 모든 시스템 기능을 **서버 프로세스** 형태로 제공합니다. 사용자 어플리케이션과 시스템 서비스 간의 통신을 설명한 그림들을 보면 대부분 계층이 나뉘어진 것처럼 표현한 경우가 많습니다. 안드로이드 입문자 입장에서는 계층이 분리되어 있다는 오해를 살 수도 있는 표현 방식이라고 생각합니다. 그러나 사실 앱 개발자가 개발한 응용 프로그램이나 시스템 서비스나 모두 같은 층의 유저 공간에서 실행되는 리눅스 프로세스에 불과합니다. 보다 더 쉬운 이해를 위해 이미지를 첨부합니다.
 ![User Space Linux Processes](/android/images/user-space-processes.png)
 
-## Android Framework
-어디까지가 안드로이드 프레임워크인가?
-![Overall Architecture System Services](/android/images/android-overall-architecture.png)
+## Application Framework
+어플리케이션 프레임워크는 시스템 서비스, 안드로이드 런타임 등의 집합입니다.
+
 ![Scope Of Framework](/android/images/android-framework.png)
 
-(미완)
+![Overall Architecture System Services](/android/images/android-overall-architecture.png)
 
 ### Init
 안드로이드 OS의 부팅 과정도 보통의 리눅스와 동일합니다. 커널 부팅 작업의 마지막 단계로 init.rc 설정 파일에 의거하여 init 프로세스를 실행하는 것입니다.(물론 안드로이드 환경에서 init.rc는 그 플랫폼 특성에 맞게 몇 가지 특별한 설정이 추가되어 있습니다.) 여기서 init이란 유저 모드(user space)에서 가장 처음 실행되는 프로세스로, 그 후 생성되는 유저 모드의 모든 어플리케이션의 부모가 됩니다. 
