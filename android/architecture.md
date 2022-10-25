@@ -90,7 +90,6 @@ IPC는 Inter Process Communication의 약자로 프로세스 간 신호(signal)�
 
 (미완)
 
-
 ### 참고
 **전문 서적**
 - [Android System Programming - Porting, customizing, and debugging Android HAL](https://www.amazon.com/Android-System-Programming-customizing-debugging/dp/178712536X)
