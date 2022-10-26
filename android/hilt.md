@@ -44,3 +44,19 @@ SOLID 개방 폐쇄 원칙
 
 **Composition over inheritance**
 
+```kt
+data class Data(val value: Int)
+
+class Repository {
+    fun save(data: Data){
+
+    }
+}
+
+class Server {
+    private val repository = Repository()
+
+    fun receive(data: Data){
+        repository.save(data)
+    }
+}
