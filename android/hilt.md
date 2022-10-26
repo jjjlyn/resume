@@ -43,3 +43,4 @@ SOLID 개방 폐쇄 원칙
 어떠한 기능을 추가하고자 할 때, 기존 코드를 수정하지 않고 새로운 기능을 추가할 수 있어야 한다.
 
 **Composition over inheritance**
+
