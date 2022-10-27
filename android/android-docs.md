@@ -1,5 +1,5 @@
 # 안드로이드 개발 회고록
-서비스 개발부터 출시까지의 과정에서 발생한 문제와 이를 해결하기 위한 과정을 공유하고자 합니다.</br>
+서비스 개발부터 출시까지의 과정에서 발생한 문제와 이를 해결하기 위한 방법을 공유하고자 합니다.</br>
 이 밖에도 특정 기술 혹은 개념에 관하여 개인적으로 이해한 내용을 정리한 자료가 포함되어 있습니다.
 
 1. [안드로이드 기본 중의 기본 - Android Architecture](/android/architecture.md)
@@ -13,12 +13,12 @@
      - DiffUtil
      - PagingAdapter
 3. [Access Token을 어떻게 단 한번만 갱신할 수 있을까](/android/renew-access-token.md)
-4. [MVVM 왜 필요한가](/android/mvvm.md)
-5. [커스텀뷰 극복기](/android/custom-view.md)
+4. [커스텀뷰 극복기](/android/custom-view.md)
     - 초보: 프로그래스바
     - 중급: 3*3 뷰페이저 인디케이터
     - 고급: 쿠팡이츠 슬라이드 클론
-6. [Clean Architecture](/android/clean-architecture.md)
+5. [대세는 Clean Architecture](/android/clean-architecture.md)
+6. [Model-View-Whatever](/android/data-presentation-architecture.md)
 7. [Hilt란 무엇이며, 왜 DI 툴로 Hilt를 선택했는가](/android/hilt.md)
 8. 디자인 시스템 적용기
     - 폰트 재사용
