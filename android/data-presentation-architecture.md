@@ -1,13 +1,32 @@
-# Android Data Presentation Architecture - MVP, MVVM, MVI
+# Android Data Presentation Architecture - MVC, MVP, MVVM, MVI
 
-MVC, MVVM, MVI 등 `MV` 접두어가 달린 친구들은 **Data Presentation** (Clean Architecture 관점에서 Presentation Layer)을 위한 소프트웨어 아키텍처 패턴입니다. 안드로이드 앱은 UI로 사용자에게 데이터를 보여주는 것이 주 목적입니다. 사용자의 관점에서 앱 화면은 어떻게 개발을 했든(코드 퀄리티가 좋든 나쁘든 ㅋㅋ) 동일하게 보입니다. 그러나 개발자 관점에서는 이야기가 달라집니다. 하나의 프래그먼트에 뷰 업데이트·비지니스·데이터 관리(CRUD) 로직 등이 모두 들어 있다고 생각해봅시다. 제 개인적으로는 유지보수가 매우 끔찍할 것 같습니다. 즉 `Model-View-Whatever` 소프트웨어 아키텍처 패턴은 개발자에게 필요해서 나온 패러다임 입니다. 협업, 유지보수 등이 수월해진다면 이는 궁극적으로 사용자 경험에도 좋은 영향을 주겠죠 :)
+MVC, MVP, MVVM, MVI 등 `MV` 접두어가 달린 친구들은 **Data Presentation** (Clean Architecture 관점에서 Presentation Layer)을 위한 소프트웨어 아키텍처 패턴입니다. 안드로이드 앱은 UI로 사용자에게 데이터를 보여주는 것이 주 목적입니다. 사용자의 관점에서 앱 화면은 어떻게 개발을 했든(코드 퀄리티가 좋든 나쁘든 ㅋㅋ) 동일하게 보입니다. 그러나 개발자 관점에서는 이야기가 달라집니다. 하나의 프래그먼트에 뷰 업데이트·비지니스·데이터 관리(CRUD) 로직 등이 모두 들어 있다고 생각해봅시다. 제 개인적으로는 유지보수가 매우 끔찍할 것 같습니다. 즉 `Model-View-Whatever` 소프트웨어 아키텍처 패턴은 개발자에게 필요해서 나온 패러다임 입니다. 협업, 유지보수 등이 수월해진다면 이는 궁극적으로 사용자 경험에도 좋은 영향을 주겠죠 :)
+
+부끄럽지만 최근까지만 해도 **Model**, **View**, **비지니스 로직**이 정확히 무엇을 지칭하는 것인지 알지 못했습니다. 그도 그럴만한게 'MVC의 View는 XML 레이아웃을 지칭하고, MVP·MVVM·MVI의 View는 Activity 혹은 Fragment를 가리킨다'라는 말이 상당한 혼란을 주었습니다. 'Model은 데이터를 관리하는 기능을 한다'라는 말도 CRUD(Create, Read, Update, Delete) 작업을 포함하는 것인지 아니면 단순히 데이터 모델을 지칭하는 것인지 헷갈리기도 했고요.(저만 그런가요?) 이번 기회에 제대로 짚고 넘어가자는 의미에서 문서를 작성합니다. 
+
+## Model And View가 정확히 의미하는 바는?
+
+**Model**
+
+
+**View**
+
+
+
+## 비지니스 로직이란 무엇인가?
+
+CRUD 아님. UI 업데이트 로직 아님. 
+
+## MVC (Model-View-Controller)
+
 
 ## MVP (Model-View-Presenter)
+
 ![MVP](/android/images/mvp.png)
 
 비록 실무에서 사용하지는 않았으나 아키텍처 패턴의 변천기를 아는 것은 여전히 중요하기에 간단히 다룹니다.
 
-안드로이드 초창기에는 MVC와 유사한 아키텍처 패턴을 주로 사용했습니다. Activity가 Controller, View는 android.widget.View 계층, Model은 어플리케이션의 데이터를 관리하는 역할. 
+안드로이드 초창기에는 MVC와 유사한 아키텍처 패턴을 주로 사용했습니다. 안드로이드의 MVC에서는 Activity 혹은 Fragment가 Controller와 View의 역할 모두를 수행하며, Model은 데이터를 
 Activity를 최대한 많이 만들어서 다른 앱들과 통신하기 위함. 이러한 이유로 액티비티는 인스턴스화 할 수 없고 오로지 인텐트를 사용하여 시작할 수 있음. 액티비티를 직접적으로 인스턴스화 하지 못하기 때문에 액티비티 생성자에 특정 의존성을 주입할 수가 없다. 또한 액티비티는 생명주기를 갖고 있어 이를 모두 상속받아야 한다. 그리하여 액티비티는 특별한 테스트 도구가 없는 한 유닛 테스팅이 어려워 실제 기기나 AVD 에뮬레이터를 통해 통합 테스트에 의존하는 수밖에 없다. 특별한 테스트 도구(e.g. Roboletric)나 통합 테스트를 사용하는 것은 속도가 느리기도 하거니와, firebase test lab과 같은 테스팅 클라우드를 이용하는 경우 비용적인 측면에서도 부담이 있다.
 이러한 문제를 해결하기 위해 액티비티와 차후 나타난 프래그먼트를 위한 Humble Object 패턴이 도입된다. 이는 액티비티의 복잡다단한 로직을 최대한 추출해서 분리하는 패턴이다. 그 중 유명한 방법이 MVP 아키텍처 패턴이다. 액티비티와 뷰계층(android.widget.View)은 View가 되고, presenter는 모델로부터 데이터를 가져와 비지니스 로직을 수행하며, 모델은 mvc의 m의 역할을 수행한다. 즉 어플리케이션의 데이터를 관리하는 역할을 한다. Presenter는 데이터를 가공하여 View에 업데이트한다. View 또한 user interaction이 발생했을 때 Present를 호출한다. 두 컴포넌트의 관계로 인해 둘 간의 관계(contract)를 인터페이스로 정의해야 한다.
 
@@ -148,9 +167,13 @@ class MyViewModel(
 ```
 
 ## MVI (Model-View-Intent)
+
+> 주의: MVI의 Intent는 안드로이드 컴포넌트 통신에 사용되는 Intent가 아닙니다.
+
 어플리케이션의 상태 관리 차원에서 이점이 있는 아키텍처이다. 
 
 ## 그렇다면 작성자 본인은 무슨 패턴을 선택하였는가
+MVI도 써보고 MVVM도 써봤다. MVVM이 유지보수하기 더 편하다는 사견이다^^
 
 ## 참고
 
