@@ -30,42 +30,129 @@
 
 ### Company.
 [(주)헤이드컴퍼니](https://www.hayd.app/)
-### Main Tasks.
-- 안드로이드 앱 1인 개발 > [앱 바로가기](https://play.google.com/store/apps/details?id=app.hayd.android)
-  - 사용 언어: Kotlin
-- 백엔드 API 개발·유지보수
-  - 사용 언어: Java, Go
-  - 프레임워크: Spring boot
-  - DB: MySQL
-  - Kafka(회원가입 목적)
-  - Redis(메일 인증, 중복 로그인 방지 목적)
-- 인프라 관리
-  - 사용 기술: Nginx, Docker, AWS, Azure
-### Period.
+
+### Main Duties.
+**Project.**
+
+안드로이드 어플리케이션 1인 개발
+
+[앱 바로가기 - 헤이드ㅣHAYD - 내가 먹는 영양제 분석](https://play.google.com/store/apps/details?id=app.hayd.android)
+- 건강기능식품(영양제) 개인 맞춤 섭취 관리 (푸시, 대시보드 기능)
+- 제품 상세 정보 제공
+- 제품 간 성분 함량 비교 · 합산 기능 제공
+
+**Tasks.**
+
+- 사용 언어: Kotlin
+- 1인 개발 · 배포 · 출시 · 유지보수
+- 회원가입 · 로그인(이메일, 소셜로그인 - 구글 · 카카오) 기능 구현
+- 커스텀뷰(제품 상세 성분 함량 차트, 가격 선택 슬라이더, 섭취 현황 프로그래스바) 구현
+- Clean Architecture (멀티모듈 어플리케이션) 적용
+- Jetpack AAC를 이용하여 MVVM 아키텍처 적용
+- FCM(Firebase Cloud Messaging)을 사용하여 푸시(알림) 서비스 구현
+- Content Provider를 이용하여 사진 다중선택 · 첨부 기능 구현
+- Jetpack Hilt를 통해 DI(Dependency Injection) 적용
+- 디자인 시스템(폰트, 레이아웃 등) 모듈화하여 재활용
+- 달력 컴포넌트 구현(그리드 레이아웃 -> 커스텀뷰로 차후 리팩토링 하였음)
+- Coroutines & Flow를 통한 비동기 처리
+- Azure pipelines를 이용하여 CI / CD 스크립트 설정 - 코드 통합 · 배포 자동화 (구글 플레이
+스토어 내부테스트 버전 업로드)
+- Jetpack Navigation Deeplink를 이용하여 이벤트 공유하기 -> 앱 바로가기 기능 구현
+- Firebase Crashlytics를 통해 앱 크래시 로그 추적
+- Firebase Analytics를 사용하여 이벤트 사용자 로그 추적
+
+**Duration.**
+
 2020.08 - 2022.09
+
 * * *
+
+**Project.**
+
+백엔드 API 기능 추가 및 유지보수
+- 계정 관리 서버 어플리케이션
+- 제품 관리 서버 어플리케이션
+- 푸시 관리 서버 어플리케이션
+
+**Tasks.**
+
+- 사용 언어 및 프레임워크 : Java(Springboot), Go
+- DB: MySQL
+- Kafka(회원가입 목적)
+- Redis(메일 인증, 중복 로그인 방지 목적)
+
+**Duration.**
+
+2021.07 - 2022.09
+
+* * *
+
+**Project.**
+
+개발 · 운영환경 구축 및 운영
+
+**Tasks.**
+
+- 자세한 내용은 [이 곳](https://github.com/jjjlyn/resume/blob/main/infra/overall-architecture.md)에서 확인하실 수 있습니다.
+- 운영 환경 관리
+- 개발 환경 구축
+
+**Duration.**
+
+2021.07 - 2022.09
+
+### Working Period.
+*2020.08 - 2022.09*
+
+* * *
+
 ### Company.
 [(주)이썸테크](http://www.esumtech.com/)
-### Main Tasks.
-- 안드로이드 앱 개발 및 유지보수
-  - 사용 언어: Java
-### Period.
-2020.01 - 2020.07
+
+### Main Duties.
+
+**Project.**
+
+농림수산식품교육문화정보원(이하 농정원) 국가농식품정보시스템(NAIS) 구축 · 유지보수 프로젝트
+
+**Tasks.**
+
+- 사용 언어 : Java
+- 다국어 처리 (말레이시아 · 인도네시아)
+- Retrofit을 통한 서버 API 연동
+- MVVM 아키텍처(Jetpack AAC ViewModel) 적용
+- Google Maps Android API 연동 (앱 사용자 동향 파악)
+
+### Working Period.
+*2020.01 - 2020.07*
+
 * * *
+
 ### Company.
 [(주)이썸테크](http://www.esumtech.com/)
-### Main Tasks.
-농정원 베트남 NAIS 외주 개발
-- 안드로이드 앱 개발 및 유지보수
-  - 사용 언어: Java
-### Period.
-2019.07 - 2019.12
+
+### Main Duties.
+
+**Project.**
+
+농림수산식품교육문화정보원(이하 농정원) 국가농식품정보시스템(NAIS) 구축 · 유지보수 프로젝트 외주 개발
+
+**Tasks.**
+
+- 사용 언어 : Java
+- 다국어 처리 (베트남)
+- Retrofit을 통한 서버 API 연동
+- MVVM 아키텍처(Jetpack AAC ViewModel) 적용
+- Google Maps Android API 연동 (앱 사용자 동향 파악)
+
+### Working Period.
+*2019.07 - 2019.12*
 
 ## Education.
 
 |교육 기관|내용|기간|
 |--------|----|---|
-|패스트 캠퍼스|Flutter로 구현하는 크로스플랫폼 앱 개발|2019.12 - 2020.02|
+|패스트캠퍼스|Flutter로 구현하는 크로스플랫폼 앱 개발|2019.12 - 2020.02|
 |이화여자대학교|커뮤니케이션 미디어학(학사)|2015.03 - 2020.08|
 
 ## Other Experience.
