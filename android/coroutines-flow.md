@@ -3,10 +3,43 @@
 ## CoroutineScope
 모든 코루틴 작업은 CoroutineScope가 관리한다. GlobalScope는 CoroutineScope의 전역 인스턴스다.
 
-CoroutineScope는 더 이상 필요하지 않을 때 코루틴을 취소하거나 정리하는 작업을 한다. GlobalScope는 프로세스의 생명주기를 따라가기에 가장 수명(생명주기)이 길다. 책에서 예를 들어 설명하기에는 GlobalScope가 적합하지만, 실제 개발 시에는 더 범위가 작은 Scope가 필요할 수 있다. 가령 UI를 업데이트하기 위해 I/O를 할 때 다른 화면으로 전환하면 더 이상 이 코루틴 작업이 필요없게 된다. Android에서 Jetpack은 이를 위해 다양한 범위에 걸친 CoroutineScope 구현체를 제공한다.
+**CoroutineScope는 더 이상 필요하지 않을 때 코루틴을 취소하거나 정리하는 작업을 한다.** GlobalScope는 프로세스의 생명주기를 따라가기에 가장 수명(생명주기)이 길다. 문서 등에서 예시를 들 경우에는 GlobalScope를 사용하는 것이 적합하지만, 실제 개발 시에는 더 범위가 작은 Scope가 필요하다. 가령 UI를 업데이트하기 위해 I/O를 할 때 다른 화면으로 전환하면 더 이상 이 코루틴 작업이 필요없게 된다. Android에서 Jetpack은 이를 위해 다양한 범위에 걸친 CoroutineScope 구현체를 제공한다.
 
-## Builder
+CoroutineScope는 개발자가 생성한 코루틴을 추적하여, 실행된 코루틴을 모두 취소할 수 있다. 
+
+코루틴 스코프는 다수의 코루틴의 구조화된 동시성을 지원한다. 예를 들어 코루틴 스코프 내부의 특정 코루틴이 crash될 때 나머지 코루틴은 모두 취소된다. 
+
+코루틴 스코프는 어떻게 생성되나?
+
+- GlobalScope
+- 코루틴 빌더를 실행할 때
+- 프레임워크가 지원하는 스코프를 사용할 때
+- withContext()를 호출할 때 - 현재 dispatcher를 변경하여 다른 스레드 풀에서 코루틴을 실행하고자 할 때
+- coroutineScope()를 호출할 때 - 현재 dispatcher를 유지한 채 새로운 코루틴 스코프를 생성하고자 하는 경우
+- supervisorScope()를 호출할 때 - 코루틴 스코프 내부에서 돌아가는 코루틴 하나가 exception이 나도 나머지 코루틴을 취소하지 않고 실행하고자 할 때
+- 테스트 스코프(Test Scopes)
+- 커스텀 스코프(Own Custom Scopes)
+
+## 코루틴 빌더
 GlobalScope를 호출할 때 사용하는 `launch()`는 코루틴 빌더이다. 코루틴 빌더는 람다 표현식을 사용한다. 코루틴이 수행할 실제 작업을 람다 내부에 작성하면 된다.
+
+`launch()`, `async()`, `runBlocking()` 등의 종류가 있다.
+
+**launch()**
+
+*fire and forget*
+
+한번 실행하고 나면 결과를 반환하지는 않는다. `launch()`는 Job 객체를 반환한다. 이는 현재 실행 중인 작업을 관리(e.g. cancel)하는데 사용한다.
+
+**async()**
+
+Job 객체의 subclass인 Deffered가 반환된다. `launch()`가 람다의 결과를 무시(ignore)하는 것과 달리, async는 **Deffered 객체 안에 람다의 결과를 담아 반환**한다. 직접적인 반환값을 필요로 할 때 사용한다. await()으로 async 람다의 결과를 기다린 후 Deffered 객체를 받는다. 
+
+참고로 `await()` 자체도 suspend 함수이기 때문에 코루틴 빌더 혹은 다른 suspend 함수 내에서 호출해야 한다.
+
+**runBlocking()**
+
+suspend 함수를 코루틴 밖에서 호출하고 싶을 경우 사용한다. 나만의 코루틴을 설정할 수 없는 경우(그런 권한이 없는 곳에서 e.g. 안드로이드 프레임워크 메서드)에 `runBlocking()`을 호출하면 코루틴 launcher를 block한다(모든 코루틴의 실행을 block 상태로 만드는 것). `runBlocking()`도 람다를 제공하여 코루틴을 그 내부에서 실행할 수 있다. 그러나 코루틴 작업이 완료되고나서야 비로소 반환된다(block이 풀린다.) 즉 suspend를 만났다고 다른 코루틴으로 갈아타지 않고 계속 대기 상태로 있는 것.
 
 ## Dispatcher
 코루틴 빌더에 설정을 주는 역할을 한다. 어떤 스레드 풀이 코루틴 내부 코드를 실행하는지를 지정한다.
@@ -104,8 +137,53 @@ Although the many-to-many model appears to be the most flexible of the models di
 코루틴은 여느 협동 방식을 채택하는 멀티태스킹과 같이, 협동(cooperation)을 필요로 한다. 예를 들어 코루틴이 다른 코루틴에 실행을 양도하지 않을 시 다른 코루틴들은 일정 시간동안 실행할 수 없게 된다. 그래서 코루틴의 협동 방식은 앱(프로세스) 간의 관계에서는 좋은 선택이 아닐 수 있다. 왜냐하면 앱 개발자들은 본인의 앱이 타 앱에 비해 중요도가 높다고 생각하기 떄문이다. 그러나 앱 내부에서는 코루틴 간의 협동이 중요하다. 코루틴 하나가 잘못 동작하는데 다른 코루틴들이 이를 돕지 않으면 앱 크래시 혹은 버그가 발생할 수 있기 때문이다. 즉 코틀린 코루틴은 in-app에서 유용한 동시성 모델이다. 여전히 코틀린은 OS와 선점 멀티태스킹 방식에 의존한다(앱 간의 관계 차원에서 - 프로세스, 스레드).
 
 ### 외면받던 코루틴, 다시 돌아오다
-멀티스레드 프로그래밍이 각광받던 시기에 코루틴은 잠시 어둠 속으로 사라졌다. 
+멀티스레드 프로그래밍이 각광받던 시기에 코루틴은 잠시 어둠 속으로 사라졌다. 멀티스레드 방식의 복잡성이 밝혀지고 리액티브 프로그래밍이 대두되면서 코루틴은 다시 인기를 얻게 된다.
 
 코틀린은 자바의 "green/red" 스레딩 방식을 공유한다. 코루틴은 작업(코루틴)과 그 작업을 실행할 환경(스레드 혹은 스레드 풀)을 분리시켰다. 코루틴이 작업할 스레드 혹은 스레드 풀을 지정할 수 있다. 즉 안드로이드 main 스레드가 UI 업데이트에만 사용되게 제한하는 등의 문제를 해결할 수 있게 됐다. 
 
-그러나 
+코루틴이 native thread에서 실행되든 자바 green thread에서 실행되든, 이는 코루틴 작성자(우리 같은 개발자)가 아니라 코루틴 라이브러리에서 결정한다. 코루틴은 스레드와 스레드 풀을 공유하고, 사용할 수 있는 실제 스레드보다 훨씬 많은 코루틴을 사용할 수 있다.
+
+## Flows and Channels
+### Hot and Cold Stream
+GPS 위성은 지구 상에 GPS 수신기가 켜진 상태가 아니더라도 계속 송신한다. 이렇게 수신 여부와 상관없이 계속 데이터를 송신하는 것을 Hot Stream이라고 한다.
+
+스마트폰의 GPS 라디오 기능은 배터리를 절약하기 위해 기본적으로 turn-off 상태이다. 앱이 GPS 상태를 수정해달라고 요청할 경우에만 GPS 정보를 송신한다. 수신 대상이 정보를 요청할 때만 데이터를 송신하는 것을 Cold Stream이라고 한다.
+
+보통 Flow는 cold stream, Channel은 hot stream을 모델로 한 것이다. 물론 hot stream을 위한 Flow(SharedFlow, StateFlow)도 존재한다.
+
+## Dispatcher
+코루틴이 어느 스레드에서 돌아갈 것인가는 내가 선택한 dispatcher에 달려있다.
+
+### 일반적으로 제공되는 Dispatchers
+
+**Dispatchers.Default**
+
+코루틴 빌더에 별다른 dispatchers 설정을 주지 않을 시 기본값이 된다. 일반적인 백그라운드 작업을 수행할 때 사용한다.
+
+**Dispatchers.IO**
+
+잠재적으로 block 될 가능성이 있는 I/O 작업에 사용한다. Dispatchers.Default와 스레드풀을 공유한다. 스레드 풀을 사용하는 로직은 Dispatchers.Default와 차이가 있음. 
+
+즉 Dispatchers.Default와 Dispatchers.IO 모두 백그라운드 작업에 사용하나, 전자는 block될 가능성이 없는 작업, 후자는 block될 여지가 있는 작업을 대상으로 한다.
+
+**Dispatchers.Main**
+
+**magic thread**로 불리는 메인 스레드에서 코루틴이 돌아간다. UI 작업을 할 때 사용한다.
+
+### 일반적이지 않은 Dispatchers
+
+`newFixedThreadPoolContext()`
+
+`newSingleThreadContext()`
+
+### Dispatcher 결정
+Dispatcher를 결정하는 것은 스레드 혹은 스레드풀을 선택하는 것과 비슷하다.
+
+안드로이드 개발자 입장에서 `launch(Dispatchers.Main)`을 Handler 혹은 View의 `post()`와 비슷하다고 보면 된다. 이 메서드들은 Runnable 객체를 갖고 있으며 메인 스레드의 작업 큐에 하나씩 추가된다. 즉 `post()`를 즉시 호출해도 Runnable을 실행할 순서에 아직 도달하지 못했기 때문에 즉시 실행되지 않는다. 코루틴도 이와 마찬가지로 `launch(Dispatchers.Main)`을 호출한다고 그 즉시 실행되는 것이 아니다.
+
+Dispatchers.Main.immediate라는 특수한 Dispatcher가 있긴 한데, 이걸 사용하면 호출하는 그 즉시 실행된다.
+
+안드로이드 개발자 입장에서 `launch(Dispatchers.Main.immediate)`는 `runOnUiThread()`를 호출하는 것과 같다고 생각하면 된다. `post()`와 같은 역할을 하는 것처럼 보이지만 근소한 차이가 있다.
+
+- `post()`는 항상 Runnable을 작업 큐에 넣는다.
+- `runOnUiThread()`
