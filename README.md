@@ -46,19 +46,18 @@
 - 사용 언어: Kotlin
 - 1인 개발 · 배포 · 출시 · 유지보수
 - 회원가입 · 로그인(이메일, 소셜로그인 - 구글 · 카카오) 기능 구현
-- 커스텀뷰(제품 상세 성분 함량 차트, 가격 선택 슬라이더, 섭취 현황 프로그래스바) 구현
-- Clean Architecture (멀티모듈 어플리케이션) 적용
-- Jetpack AAC를 이용하여 MVVM 아키텍처 적용
+- [커스텀뷰(제품 상세 성분 함량 차트, 가격 선택 슬라이더, 섭취 현황 프로그래스바) 구현](/android/custom-view.md)
+- [Clean Architecture (멀티모듈 어플리케이션) 적용](/android/clean-architecture.md)
+- [Jetpack AAC를 이용하여 MVVM 아키텍처 적용](/android/data-presentation-architecture.md)
 - FCM(Firebase Cloud Messaging)을 사용하여 푸시(알림) 서비스 구현
 - Content Provider를 이용하여 사진 다중선택 · 첨부 기능 구현
-- Jetpack Hilt를 통해 DI(Dependency Injection) 적용
-- 디자인 시스템(폰트, 레이아웃 등) 모듈화하여 재활용
+- [Jetpack Hilt를 통해 DI(Dependency Injection) 적용](/android/di.md)
+- [디자인 시스템(폰트, 레이아웃 등) 모듈화하여 재활용](/android/design-system.md)
 - 달력 컴포넌트 구현(그리드 레이아웃 -> 커스텀뷰로 차후 리팩토링 하였음)
-- Coroutines & Flow를 통한 비동기 처리
-- Azure pipelines를 이용하여 CI / CD 스크립트 설정 - 코드 통합 · 배포 자동화 (구글 플레이
-스토어 내부테스트 버전 업로드)
+- [Coroutines & Flow를 통한 비동기 처리](/android/coroutines-flow.md)
+- [Azure pipelines를 이용하여 CI / CD 스크립트 설정 - 코드 통합 · 배포 자동화 (구글 플레이 스토어 내부테스트 버전 업로드)](/infra/ci_cd/android-ci-cd.md)
 - Jetpack Navigation Deeplink를 이용하여 이벤트 공유하기 -> 앱 바로가기 기능 구현
-- Firebase Crashlytics를 통해 앱 크래시 로그 추적
+- [Firebase Crashlytics를 통해 앱 크래시 로그 추적](/android/handle-app-crash.md)
 - Firebase Analytics를 사용하여 이벤트 사용자 로그 추적
 
 **Duration.**
@@ -159,10 +158,10 @@
 
 |종류|내용|기간|링크|
 |--------|----|----|----|
-|사이드 프로젝트 teamMOC||2021.11 ~ In Progress.|[링크](https://github.com/jjjlyn/moc-android)|
+|사이드 프로젝트 teamMOC||2021.11 ~ In Progress.|[바로가기](https://github.com/jjjlyn/moc-android)|
 |Java 스터디||2021.05 - 2021.08|-|
-|사이드 프로젝트 동아리 DDD 5기||2021.03 - 2021.08|[발표자료 링크](https://github.com/jjjlyn/DDD-5-Android-Session)|
-|Design Pattern 스터디||2021.01 - 2021.03|[링크](https://github.com/CS-Study-Team)|
+|사이드 프로젝트 동아리 DDD 5기||2021.03 - 2021.08|[발표자료 바로가기](https://github.com/jjjlyn/DDD-5-Android-Session)|
+|Design Pattern 스터디||2021.01 - 2021.03|[바로가기](https://github.com/CS-Study-Team)|
 
 ## Languages.
 
