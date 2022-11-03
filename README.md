@@ -161,7 +161,7 @@
 |사이드 프로젝트 teamMOC||2021.11 ~ In Progress.|[바로가기](https://github.com/jjjlyn/moc-android)|
 |Java 스터디||2021.05 - 2021.08|-|
 |사이드 프로젝트 동아리 DDD 5기||2021.03 - 2021.08|[발표자료 바로가기](https://github.com/jjjlyn/DDD-5-Android-Session)|
-|Design Pattern 스터디||2021.01 - 2021.03|[바로가기](https://github.com/CS-Study-Team)|
+|Design Pattern 스터디||2021.01 - 2021.03|[바로가기](https://github.com/CS-Study-Team/DesignPattern)|
 
 ## Languages.
 
