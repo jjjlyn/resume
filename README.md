@@ -158,10 +158,10 @@
 
 |종류|내용|기간|링크|
 |--------|----|----|----|
-|사이드 프로젝트 teamMOC||2021.11 ~ In Progress.|[바로가기](https://github.com/jjjlyn/moc-android)|
-|Java 스터디||2021.05 - 2021.08|-|
-|사이드 프로젝트 동아리 DDD 5기||2021.03 - 2021.08|[발표자료 바로가기](https://github.com/jjjlyn/DDD-5-Android-Session)|
-|Design Pattern 스터디||2021.01 - 2021.03|[바로가기](https://github.com/CS-Study-Team/DesignPattern)|
+|사이드 프로젝트 teamMOC|안드로이드 어플리케이션 1인 개발|2021.11 ~ In Progress.|[바로가기](https://github.com/jjjlyn/moc-android)|
+|Java 스터디|주 1회 [자바의 정석(남궁성 저)](https://book.interpark.com/product/BookDisplay.do?_method=detail&sc.prdNo=249927409&gclid=CjwKCAjwzY2bBhB6EiwAPpUpZl3z6k4HoAdQ1NWLRaoO0kVfB4jTuo0b-WcYyvXNjoLtflAQ3Bt0VxoCzwwQAvD_BwE) 발표 스터디|2021.05 - 2021.08|-|
+|사이드 프로젝트 동아리 DDD 5기|안드로이드 포지션으로 참여|2021.03 - 2021.08|[발표자료 바로가기](https://github.com/jjjlyn/DDD-5-Android-Session)|
+|Design Pattern 스터디|주 2회 [GoF의 디자인 패턴](http://www.yes24.com/Product/Goods/17525598) 발표 스터디|2021.01 - 2021.03|[바로가기](https://github.com/CS-Study-Team/DesignPattern)|
 
 ## Languages.
 
