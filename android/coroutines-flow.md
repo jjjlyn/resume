@@ -158,11 +158,22 @@ Dispatchers.Main.immediate라는 특수한 Dispatcher가 있긴 한데, 이걸 �
 
 기본적으로 Flow는 Cold Stream, Channel은 Hot Stream 기반입니다. 물론 Hot Stream을 위한 Flow(SharedFlow, StateFlow)도 존재합니다.
 
-## Suspending Function Guidelines (62/245)
+### Flows
+- 코틀린 코루틴 시스템에서 제공하는 최상위 함수를 호출한다. 
+  ```kt
+  flow{
 
-## Managing Jobs (66/245) >> 여기에 기술하면 안됨
+  }
+  ```
+- Channel을 Flow로 변환한다.
+- 서드파티 라이브러리를 통해 Flow를 가져온다.
 
-## Working with Flows (94/245)
+Flow는 collect를 단 한번만 할 수 있다. 
+반면 StateFlow, SharedFlow는 subscribers 모두가 동시에 값을 받을 수 있다.
+
+MutableSharedFlow()는 캐싱의 기능도 있다. reply(N)은 최신 emit한 N개의 object를 캐싱한다는 의미다.
+
+These add additional buffer capacity
 
 ## Opting Into SharedFlow and StateFlow (110/245)
 
@@ -175,9 +186,6 @@ Dispatchers.Main.immediate라는 특수한 Dispatcher가 있긴 한데, 이걸 �
 ## Applying Coroutins to Your UI (160/245)
 
 ## 왜 RX-Android 대신 Coroutines-Flow를 채택했는가?
-
-withContext()를 호출하면 child job이 생긴다.(job은 계층적)
-코루틴 빌더를 사용하여 만든 Job은 기본적으로 active 상태이다.  
 
 ## 참고
 
