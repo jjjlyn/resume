@@ -3,15 +3,16 @@
 비동기 처리에 주로 사용하던 Coroutines-Flow에 대해 알아보겠습니다. 하단 참고란에 명시한 서적과 작성자의 개발 경험을 토대로 이해한 것에 대해서만 기술합니다.
 
 ## 코루틴 왜 사용하는가? 
+
 스레드보다 비용이 저렴합니다!</br>
 스레드 중심적인 프로그래밍에서는 많은 스레드를 생성하는 것에 대한 부담이 있습니다. 스레드는 heap 공간을 꽤 많이 소비합니다. 게다가 스레드 간의 컨텍스트 스위칭이 발생하면 이에 따른 오버헤드가 생깁니다.
 
 그러나 코루틴은 스레드에 비해 가성비가 좋습니다. 왜 Why? 
 
-(작성 중)
-
 ## 코루틴의 역사
+
 ### 선점 방식과 협조 방식의 멀티태스킹
+
 프로그래밍에서 멀티태스킹은 프로그램들이 어떻게 한번에 여러가지 작업을 수행하는 것처럼 보이게 하는가를 의미합니다. 주요 관점으로는 협조(Cooperative) 방식과 선점(Preemptive) 방식이 있습니다.
 
 현대 프로그래머들은 멀티태스킹이라고 하면 선점 방식을 먼저 떠올릴 것입니다. 이 방식은 어떠한 멀티태스킹 방법으로 작동하는지 잊어버리기 쉽도록 구현되어 있습니다. 태스크가 실행/실행되지 않도록 준비하는 작업은 OS가 도맡아 처리하기 때문입니다. OS가 프로세스와 스레드 스케쥴링을 통해 CPU core에 올리고, 다른 프로세스나 스레드로 context switching하는 것을 보장하기 때문에 멀티태스킹의 한 방식이라는 것 조차 잊게 되는 것입니다.(개발자 개인이 따로 처리할 일이 별로 없음)
@@ -25,6 +26,7 @@
 **협조 방식은 특정 태스크가 CPU 자원이 필요한 경우(READY 상태) 현재 실행 중인 태스크에서 CPU 자원을 양보하는 것입니다. 이는 코드 상에서 태스크 A에서 태스크 B로 자원을 양도한다는 것을 명시해야 할 필요가 있습니다. 코틀린은 언어상 suspend를 통해 타 태스크로 CPU 자원을 양도할 시간이라는 것을 명시합니다.**
 
 ### Green and Red
+
 가끔 프레임워크가 선점형 멀티태스킹을 제공하는 것과 같은 착각(효과)을 주지만 실제로는 협조 멀티태스킹 모델을 채택하는 경우도 있습니다.
 
 초기 자바의 경우, 스레드는 JVM이 관리했습니다. JVM이 스레드 간의 코드 실행을 스위칭하는 방식입니다. 코드에서 각 스레드는 타 스레드에 코드 실행을 양도한다는 것을 명시할 필요가 없습니다. 왜냐하면 JVM이 코드 실행의 책임을 갖고 있어, 자기 자신(JVM)의 '스레드들'을 스위칭하는 것이기 때문입니다. -> 여기서 의문: 그렇다면 JVM은 time scheduling을 사용하지 않는가? *OS의 관점에서 이는 협조 멀티태스킹이라고 볼 수 있습니다. 그러나 자바 프로그래머 관점에서는 선점 멀티태스킹인 것입니다.*
@@ -36,6 +38,7 @@
 > 커널 위 유저 공간에 JVM이 올라가면 JVM이 여러 개의 스레드를 생성합니다. 이를 Green Threads라 합니다. Green Threads는 커널 스레드 한 개와 연결됩니다. 하나의 스레드만 커널에 접근할 수 있기 때문에 (N:1 모델이기 때문에 여러 개 스레드 중 단 한 개의 유저 영역 스레드만 일정 시간동안 커널 스레드와 매핑됩니다.) 인터럽트가 발생하면 blocking 돼서 나머지 스레드가 일을 할 수 없게 됩니다. 멀티코어 아키텍처에서는 비효율적입니다.
 
 ### 코루틴의 컨셉
+
 코루틴은 협조 방식 컨셉입니다. 코루틴은 다른 코루틴에 실행을 양도할 수 있는 특징을 가지고 있어, 언제든 바로 실행 가능한 상태(Ready)의 코루틴이 대기하고 있으면 이를 즉시 실행할 수 있습니다. 또한 코루틴은 다른 코루틴이 실행되는 것을 기다릴 수 있습니다.
 
 전통적인(?) 코루틴에서는 yield 키워드를 그대로 사용합니다. 코루틴에서는 suspend 키워드를 사용하고, 이를 만나는 시점에서 양도(다른 코루틴에 코드 실행을 넘기는 행위)를 자동적으로 수행합니다. 즉 프로그래밍 관점에서 개발자는 yield control에 대해 직접 생각할 필요가 없습니다. 
@@ -67,6 +70,7 @@ GlobalScope는 프로세스의 생명주기를 따라가기에 가장 수명(생
 > - 커스텀 스코프(Own Custom Scopes)
 
 ## Coroutine Builder
+
 코루틴 빌더를 통해 코루틴이 실행됩니다. 코루틴 빌더는 람다 표현식을 사용합니다. 코루틴이 수행할 실제 작업을 람다 내부에 작성하면 됩니다.
 
 종류로는 `launch()`, `async()`, `runBlocking()` 등이 있습니다. (Kotlin/JVM 라이브러리 기준)
@@ -88,6 +92,7 @@ Job 객체의 subclass인 Deffered가 반환됩니다. `launch()`가 람다의 �
 suspend 함수를 코루틴 밖에서 호출하고 싶을 경우 사용합니다. 나만의 코루틴을 설정할 수 없는 경우(그런 권한이 없는 곳에서 e.g. 안드로이드 프레임워크 메서드)에 `runBlocking()`을 호출하면 코루틴 launcher를 block합니다.(모든 코루틴의 실행을 block 상태로 만드는 것) `runBlocking()`도 람다를 제공하여 코루틴을 그 내부에서 실행할 수 있습니다. 그러나 코루틴 작업이 완료되고 나서야 비로소 반환됩니다.(block이 풀림) 즉 suspend를 만났다고 다른 코루틴으로 갈아타는 것이 아니라 계속 대기 상태로 있게 됩니다.
 
 ## suspend Function
+
 suspend 키워드는 코틀린 언어 차원에서 지원합니다. 그 밖의 것들은 라이브러리의 도움을 필요로 합니다.
 
 자바 개발자 입장에서는 Runnable 위에 Executor(`post()`)가 올라가 실행되는 것과 유사하다고 생각하면 됩니다. Dispatchers.Main이라면 안드로이드 개발자 입장에서 View 안에서 Runnable을 `post()`로 감싸서 Runnable이 메인 스레드에서 실행되게 하는 것과 비슷합니다.
@@ -99,11 +104,13 @@ Runnable 시나리오에서는 지정된 스레드(혹은 스레드 풀)의 작�
 그러나 코틀린은 suspend 키워드를 제공합니다. 코루틴 시스템(현재 스레드)에서는 *현재 실행 중인 코드 블럭을 중지하고* 동일한 Dispatcher를 갖고 있는 다른 코루틴 빌더의 코드로 넘어갈 수 있습니다.(넘어가려는 코루틴 빌더에 실행 가능한 코드가 있다는 전제하에)
 
 ## CoroutineContext
+
 이름 그대로 코루틴을 실행하는 context를 말합니다. 코루틴 빌더에 제공되는 Dispatcher는 **CoroutineContext의 요소 중 하나**이며, Job이라는 것도 있습니다.
 
 `withContext()`(최상위 함수 - 클래스 밖에 위치한 전역함수)는 suspend 함수입니다. 즉 다른 suspend 함수 내부나 코루틴 빌더 내부에서만 실행될 수 있습니다. `withContext()`는 기존 코드가 사용하는 Dispatcher에서 다른 Dispatcher로 갈아타 변경된 CoroutineContext에서 실행됩니다. 만약 `withContext()`를 호출한 현재 블록의 Dispatcher가 Dispatchers.Main 이라면, `withContext()`가 다른 스레드(풀)에서 실행되는 동안 Dispatchers.Main의 현재 코드 블록 실행은 중지될 것입니다(`withContext()`가 suspend 함수이기 때문). `withContext()`가 결과값을 반환하기까지 코틀린은 Dispatchers.Main에서 READY 상태에 있는 다른 코루틴들 중 하나를 선택해서 실행할 수 있습니다.
 
 ### Dispatcher
+
 코루틴 빌더에 해당 코루틴이 특정 스레드(풀)에서 실행될 수 있도록 설정을 주는 역할을 합니다.
 CoroutineContext는 Dispatcher, Job 등의 요소(element)를 포함합니다.
 
@@ -111,8 +118,8 @@ CoroutineContext는 Dispatcher, Job 등의 요소(element)를 포함합니다.
 - Job은 코루틴 그 자체를 의미합니다.
 
 **일반적으로 제공되는 Dispatchers**
-- Dispatchers.Default은 block될 일이 없는 일반적인 백그라운드 작업을 할 때 유용합니다.
-- Dispatchers.IO는 block될 가능성이 있는 I/O 관련 백그라운드 작업을 할 때 사용합니다.
+- Dispatchers.Default은 **block될 일이 없는** 일반적인 백그라운드 작업을 할 때 유용합니다.
+- Dispatchers.IO는 **block될 가능성이 있는** I/O 관련 백그라운드 작업을 할 때 사용합니다.
 - Dispatchers.Main은 메인 스레드가 필요한 작업을 할 때 사용합니다.
 
     **Dispatchers.Default**
@@ -146,38 +153,100 @@ Dispatchers.Main.immediate라는 특수한 Dispatcher가 있긴 한데, 이걸 �
 안드로이드 개발자 입장에서 `launch(Dispatchers.Main.immediate)`는 `runOnUiThread()`를 호출하는 것과 같다고 생각하면 됩니다. `post()`와 같은 역할을 하는 것처럼 보이지만 약간의 차이가 있습니다.
 
 - `post()`는 항상 Runnable을 작업 큐에 넣습니다.
-- `runOnUiThread()`는 현재 실행하고 있는 스레드가 메인 스레드인 경우 Runnable을 그 즉시 실행합니다. 만약 다른 스레드에서 작업하고 있는 경우 runOnUiThread()는 post()와 동일한 행동을 취합니다(work queue에 Runnable 객체를 추가하는 행위).
+- `runOnUiThread()`는 현재 실행하고 있는 스레드가 메인 스레드인 경우 Runnable을 그 즉시 실행합니다. 만약 다른 스레드에서 작업하고 있는 경우 `runOnUiThread()`는 `post()`와 동일한 행동을 취합니다.(work queue에 Runnable 객체를 추가하는 행위)
 
 ### Jobs
-(작성 중)
+
+코루틴을 시작하는 것은 코루틴 빌더의 lambda 블록 내부의 코드를 실행해달라고 시스템에 요청하는 것과 같습니다. 이 코드는 바로 실행되지 않고 queue에 들어갑니다.
+
+Job은 queue에 들어간 코루틴을 조작하는 손잡이(handler)입니다. 서로 다른 Job의 실행 순서를 관리(join, parent-child relation)하거나, 상태(new, active, completed, cancelled) 등을 감지할 수 있습니다.
 
 ## Flows and Channels
+
 ### Hot and Cold Stream
+
 - GPS 위성은 지구 상에 GPS 수신기가 켜진 상태가 아니더라도 계속 송신합니다. 이렇게 *수신 여부와 상관없이 계속 데이터를 송신하는 것*을 Hot Stream이라고 합니다.
 - 스마트폰의 GPS 라디오 기능은 배터리를 절약하기 위해 기본적으로 turn-off 상태입니다. 앱이 GPS 상태의 업데이트를 요청할 경우에만 GPS 정보를 송신합니다. *수신 대상이 정보를 요청할 때만 데이터를 송신하는 것*을 Cold Stream이라고 합니다.
 
-기본적으로 Flow는 Cold Stream, Channel은 Hot Stream 기반입니다. 물론 Hot Stream을 위한 Flow(SharedFlow, StateFlow)도 존재합니다.
+기본적으로 Flow는 Cold Stream, Channel은 Hot Stream 기반입니다. 물론 **Hot Stream을 위한 Flow(SharedFlow, StateFlow)**도 존재합니다.
 
 ### Flows
-- 코틀린 코루틴 시스템에서 제공하는 최상위 함수를 호출한다. 
+
+- 코틀린 코루틴 시스템에서 제공하는 최상위 함수를 호출합니다. 
   ```kt
   flow{
 
   }
   ```
-- Channel을 Flow로 변환한다.
-- 서드파티 라이브러리를 통해 Flow를 가져온다.
+- Channel을 Flow로 변환합니다.
+- 서드파티 라이브러리를 통해 Flow를 가져옵니다.
 
-Flow는 collect를 단 한번만 할 수 있다. 
-반면 StateFlow, SharedFlow는 subscribers 모두가 동시에 값을 받을 수 있다.
+**flow 블록으로 생성한 Flow는 단 한번만 collect할 수 있습니다.** (Each Flow created by flow() can only be collected once — we cannot have multiple collectors.)
+**반면 StateFlow, SharedFlow는 subscribers 모두가 동시에 값을 받을 수 있습니다.**
 
-MutableSharedFlow()는 캐싱의 기능도 있다. reply(N)은 최신 emit한 N개의 object를 캐싱한다는 의미다.
+MutableSharedFlow는 캐싱의 기능도 있습니다. `reply(N)`은 최신 emit한 N개의 object를 캐싱한다는 의미입니다.
 
-These add additional buffer capacity
+## SharedFlow와 StateFlow
 
-## Opting Into SharedFlow and StateFlow (110/245)
+### SharedFlow
 
-## Tuning Into Channels (122/245)
+- 브로드캐스트 매커니즘(?) - Flow에 데이터를 보내고 동시에 이를 모든 subscribers (collectors)에 공유
+- 캐시 매커니즘 - 가장 마지막에 나온 value에 접근 가능하도록
+
+일반 Flow와 달리 SharedFlow는 hot stream입니다. 이는 Flow를 생성하자마자 그 즉시 실행되는 것을 의미합니다. 얼마나 많은 구독자(subscriber)가 있든 간에 내보낼 이벤트가 있으면 이를 사용하지 못하게 되더라도(버려지더라도) 무조건 내보냅니다. 그래서 SharedFlow를 사용할 때는 생성과 이벤트 구독 순서를 유념해야 합니다.
+
+MutableSharedFlow를 만들 때 `MutableSharedFlow()`를 직접 호출하는 것 외에도 또 다른 방법이 있습니다. 일반 Flow로 시작하고 `sharedIn()` 메소드를 호출하면 됩니다.
+
+정해진 크기의 이벤트가 있고 끝나는 시점에 신호를 보내주는 기능이 필요할 떄보다는, 구독자가 더 이상 필요로 하지 않을 때까지 정보를 연속적으로 공급하는 기능이 필요할 때 SharedFlow가 강력한 방법이 되겠습니다.
+
+SharedFlow는 영원히 종료되지 않기 때문에 특정 연산기능(operators)은 아무 효력을 발휘하지 못합니다. Flow의 context를 변경하거나 cancellable, buffered를 사용한 새로운 Flow 생성 등은 SharedFlow에 사용해봐야 아무 효과가 나타나지 않습니다.
+
+### StateFlow
+
+SharedFlow의 모든 기능 + Input Data에 대한 캐싱 기능도 포함
+
+`value`로 가장 최근 보낸 데이터에 접근할 수 있습니다.
+
+- 직접 value에 접근하면 특정 시점의 StateFlow 값을 가져옵니다. 그러나 이 방법보다는 자주 변하는 데이터면 StateFlow를 구독하는 편이 낫습니다.
+- `collect`를 이용하여 구독할 수 있습니다(변화 감지).
+
+- **특정 한 곳에서만 업데이트 하는 상황이 보장될 때** `setValue()`로 업데이트 할 수 있습니다.
+- `tryEmit`를 사용하면 blocking 혹은 suspending할 필요가 없습니다. 값을 업데이트 하기 가장 안전한 방법입니다. 그러나 여러 차례에 걸쳐 값의 변화가 나타날 때 가장 최신의 데이터로 업데이트 된다는 보장이 없습니다.
+- `emit`을 사용하면 코루틴 빌더 안에서 실행하거나 suspend 함수 내부에서 돌려야 합니다. 버퍼가 다 찼을 시 suspend 될 수 있습니다. 최신의 데이터로 업데이트하기에 가장 확실한 방법입니다.
+
+SharedFlow는 Broadcast type of communication을 제공하기 때문에 실패하거나 완료될 수 없습니다. 사용자가 직접 Flow 혹은 CoroutineScope를 취소하기 전까지는 계속 정보를 전송합니다. 그렇기 때문에 Flow의 이벤트 전송을 더 이상 받지 않으려면 Flow를 정리(clean up)하는 것이 좋습니다.
+
+SharedFlow와는 Backpressure(데이터를 내보내는 속도가 너무 빠르거나, 받는 속도가 너무 느려서 중간에 데이터가 손실되는 상황)를 처리하는 방법에서 차이가 있습니다. SharedFlow가 여러 종류의 옵션을 제공하는 것에 반해, StateFlow는 단 하나의 옵션만을 제공합니다. 과거의 객체를 새로운 객체로 교체하는 방식으로 **Conflation** 이라고도 합니다.
+
+StateFlow는 **single-element 버퍼**를 갖고 있습니다. 그래서 바로 최근에 업데이트된 객체를 계속 갖고 있는 것인데, 다시 업데이트하면 기존의 것이 새로운 객체로 교체됩니다. 
+상태 관리에 좋습니다. 그래서 보통 sealed class를 StateFlow 객체로 많이 사용합니다.
+
+StateFlow는 내용(content)의 일치성으로 conflation 여부를 판단합니다.
+
+**LiveData와 차이는?**
+
+- Dispatcher Control
+  LiveData는 메인 스레드에서만 관찰할 수 있습니다. LiveData가 다른 특정 스레드에서 값을 내보내도록 하는 기능은 애초에 제공하지 않습니다. UI 계층에서 값을 받는 경우에는 상관 없으나, Room DB의 DAO가 LiveData를 반환하는 경우 UI 계층에 도달하기 전까지 이를 구독해서는 안됩니다. DAO와 UI 사이에는 Transformation과 MediatorLiveData가 필요한데, 이는 LiveData가 내보내는 결과값을 UI 계층에서 필요한 데이터 양식으로 조작하기 위해 사용합니다. 동시에 메인 스레드 외에 다른 장소에서 stream이 소비되지 않도록 해야 합니다.
+
+  StateFlow는 Dispatchers를 이용해 메인 스레드 외 장소에서도 데이터를 내보내거나 관찰할 수 있습니다.
+
+- 더 많은 연산기능(operators) 제공
+  LiveData가 Transformations에서 `map()`과 `switchMap()`만 제공하는 반면, StateFlow는 기본적으로 Flow이기 때문에 다양한 연산기능을 제공합니다. 
+
+- Scope Flexibility
+  LiveData는 안드로이드 라이프사이클을 잘 알고 있습니다.  
+
+## Tuning Into Channels
+
+- `produce` 블록을 사용(lambda expression)
+  `ReceiveChannel`을 반환합니다.
+- `Channel()`을 사용할 수 있습니다. `Channel()`은 생성자처럼 보이지만 Channel이 인터페이스라, 실제로는 Channel 객체를 만드는 최상위 factory 함수를 호출하는 것입니다.
+
+`Channel.BUFFERED` 파라미터 옵션은 64 elements(기본값) 버퍼를 의미합니다. 만약에 `send()`를 호출하고 버퍼에 공간이 있으면, `send()`는 버퍼에 전달된 object를 추가한 후 즉시 값을 반환합니다. `send()` 호출 후 버퍼가 다 찬 상태라면, `send()`는 consumer가 Channel 버퍼에 쌓인 object를 모두 소비(receive)할 때까지 중단(suspend)됩니다.
+- `actor` 블록을 사용(`produce`와 반대)
+  `SendChannel`을 반환합니다. 
+
+
 
 ## Bridging to Callback APIs (138/245)
 
@@ -188,6 +257,7 @@ These add additional buffer capacity
 ## 왜 RX-Android 대신 Coroutines-Flow를 채택했는가?
 
 ## 참고
+
 
 **전문 서적**
 
