@@ -199,7 +199,7 @@ Job은 queue에 들어간 코루틴을 조작하는 손잡이(handler)입니다.
 
 **반면 StateFlow, SharedFlow는 구독자 모두가 동시에 값을 받을 수 있습니다.**
 
-MutableSharedFlow는 캐싱의 기능도 있습니다. `reply(N)`은 가장 최근에 내보낸 N개의 object를 캐싱한다는 의미입니다.
+MutableSharedFlow는 캐싱의 기능도 있습니다. `reply(N)`은 가장 최근에 내보낸 N개의 데이터를 캐싱한다는 의미입니다.
 
 ### Channels
 
@@ -208,14 +208,10 @@ MutableSharedFlow는 캐싱의 기능도 있습니다. `reply(N)`은 가장 최�
   **ReceiveChannel**을 반환합니다.
 - `Channel()`을 사용할 수 있습니다. `Channel()`은 생성자처럼 보이지만 Channel이 인터페이스라, 실제로는 Channel 객체를 만드는 최상위 factory 함수를 호출하는 것입니다.
 
-  **Channel.BUFFERED** 파라미터 옵션은 64 elements(기본값) 버퍼를 의미합니다. 만약에 `send()`를 호출하고 버퍼에 공간이 있으면, `send()`는 버퍼에 전달된 object를 추가한 후 즉시 값을 반환합니다. `send()` 호출 후 버퍼가 다 찬 상태라면, `send()`는 consumer가 Channel 버퍼에 쌓인 object를 모두 소비(receive)할 때까지 중단(suspend)됩니다.
+  **Channel.BUFFERED** 파라미터 옵션은 64 elements(기본값) 버퍼를 의미합니다. 만약에 `send()`를 호출하고 버퍼에 공간이 있으면, `send()`는 버퍼에 전달된 데이터를 추가한 후 즉시 값을 반환합니다. `send()` 호출 후 버퍼가 다 찬 상태라면, `send()`는 구독자(consumer)가 Channel 버퍼에 쌓인 데이터를 모두 소비(receive)할 때까지 중단됩니다.
 - `actor` 블록을 사용(`produce`와 반대)
   
   **SendChannel**을 반환합니다. 
-
-**Single Event - Channel vs SharedFlow**
-
-SharedFlow은 Channel과 마찬가지로 hot stream 기반이며 ConflatedBroadcastChannel과 같은 방식으로 동작하지만, 보다 더 간편한 API를 제공합니다. 또한 다수의 구독자가 동일한 stream을 공유할 수 있습니다. 반면 Channel은 다수의 구독자에 데이터를 내보낼 수 없습니다. 하나의 이벤트를 다수의 구독자에 내보내고 싶으면 **SharedFlow**를 선택하면 될 것이고, **단독 구독자**인 것이 보장된 경우 **Channel**을 쓰면 됩니다. 한편 StateFlow를 쓰는 것은 권장하지 않습니다. StateFlow는 다수의 구독자에 상태(State)를 내보내는 것이기 때문에, content가 일치(equal)하면 `emit()`이 invoke되지 않을 것입니다. 게다가 이전 상태를 항상 저장하고 있기 때문에(single-element 버퍼) Configuration Changes(e.g. 화면 전환 Portrait -> Landscape)발생 시 다시 이전 값을 invoke(re-deliver)합니다. 따라서 일회성 이벤트를 내보내는 데 사용하기에는 부적절합니다.
 
 ## SharedFlow와 StateFlow
 
@@ -237,6 +233,8 @@ MutableSharedFlow를 만들 때 `MutableSharedFlow()`를 직접 호출하는 것
 
 SharedFlow는 영원히 종료되지 않기 때문에 특정 연산기능(operators)은 아무 효력을 발휘하지 못합니다. Flow의 컨텍스트를 변경하거나 cancellable, buffered를 사용한 새로운 Flow 생성 등은 SharedFlow에 사용해봐야 아무 효과가 나타나지 않습니다.
 
+SharedFlow는 Broadcast type of communication을 제공하기 때문에 **실패하거나 완료될 수 없습니다.** 사용자가 직접 Flow 혹은 CoroutineScope를 취소하기 전까지는 계속 정보를 전송합니다. 그렇기 때문에 Flow의 이벤트 전송을 더 이상 받지 않으려면 Flow를 정리(clean up)하는 것이 좋습니다.
+
 ### StateFlow
 
 SharedFlow의 모든 기능과 가장 최근에 내보낸 데이터에 대한 저장(캐싱) 기능을 포함합니다.
@@ -246,10 +244,8 @@ SharedFlow의 모든 기능과 가장 최근에 내보낸 데이터에 대한 �
 
 - **특정 한 곳에서만 업데이트 하는 상황이 보장될 때** `setValue()`(`.value`)로 업데이트 할 수 있습니다.
 - `tryEmit`를 사용하면 blocking 혹은 suspending할 필요가 없습니다. 값을 업데이트 하기 가장 안전한 방법입니다. 그러나 여러 차례에 걸쳐 값의 변화가 나타날 때 가장 최신의 데이터로 업데이트 된다는 보장이 없습니다.
-- `emit`을 사용하면 코루틴 빌더 안에서 실행하거나 suspend 함수 내부에서 돌려야 합니다. 버퍼가 다 찼을 시 suspend 될 수 있습니다. 최신의 데이터로 업데이트하기에 가장 확실한 방법입니다.
-
-SharedFlow는 Broadcast type of communication을 제공하기 때문에 **실패하거나 완료될 수 없습니다.** 사용자가 직접 Flow 혹은 CoroutineScope를 취소하기 전까지는 계속 정보를 전송합니다. 그렇기 때문에 Flow의 이벤트 전송을 더 이상 받지 않으려면 Flow를 정리(clean up)하는 것이 좋습니다.
-
+- `emit`을 사용하면 코루틴 빌더 안에서 실행하거나 suspend 함수 내부에서 돌려야 합니다. 버퍼가 다 찼을 시 중단될 수 있습니다. 최신의 데이터로 업데이트하기에 가장 확실한 방법입니다.
+  
 SharedFlow와는 Backpressure(데이터를 내보내는 속도가 너무 빠르거나, 받는 속도가 너무 느려서 중간에 데이터가 손실되는 상황)를 처리하는 방법에서 차이가 있습니다. SharedFlow가 여러 종류의 옵션을 제공하는 것에 반해, StateFlow는 단 하나의 옵션만을 제공합니다. 과거의 객체를 새로운 객체로 교체하는 방식으로, 이를 **Conflation**이라고 합니다.
 
 StateFlow는 **single-element 버퍼**를 갖고 있습니다. 그래서 바로 최근에 업데이트된 객체를 계속 갖고 있는 것인데, 다시 업데이트하면 기존의 것이 새로운 객체로 교체됩니다. 
@@ -257,7 +253,7 @@ StateFlow는 **single-element 버퍼**를 갖고 있습니다. 그래서 바로 
 
 StateFlow는 내용(content)의 일치성(equality)으로 conflation 여부를 판단합니다.
 
-**LiveData와 차이는?**
+**Q. LiveData와 차이는?**
 
 - Dispatcher Control
 
@@ -274,6 +270,10 @@ StateFlow는 내용(content)의 일치성(equality)으로 conflation 여부를 �
   LiveData는 안드로이드 라이프사이클을 잘 알고 있습니다.
 
   (작성 중)
+
+**Q. Single Event - Channel vs SharedFlow or StateFlow??**
+
+SharedFlow은 Channel과 마찬가지로 hot stream 기반이며 ConflatedBroadcastChannel과 같은 방식으로 동작하지만, 보다 더 간편한 API를 제공합니다. 또한 다수의 구독자가 동일한 stream을 공유할 수 있습니다. 반면 Channel은 다수의 구독자에 데이터를 내보낼 수 없습니다. 하나의 이벤트를 다수의 구독자에 내보내고 싶으면 **SharedFlow**를 선택하면 될 것이고, **단독 구독자**인 것이 보장된 경우 **Channel**을 쓰면 됩니다. 한편 **StateFlow를 쓰는 것은 권장하지 않습니다.** StateFlow는 다수의 구독자에 상태(State)를 내보내는 것이기 때문에, 내용이 일치(equal)하면 `emit()`이 invoke되지 않을 것입니다. 게다가 이전 상태를 항상 저장하고 있기 때문에(single-element 버퍼) Configuration Changes(e.g. 화면 전환 Portrait -> Landscape 등)발생 시 다시 바로 이전에 내보낸 데이터를 invoke(re-deliver)합니다. 따라서 일회성 이벤트를 내보내는 데 사용하기에는 부적절합니다.
 
 <!-- ## Bridging to Callback APIs
 
