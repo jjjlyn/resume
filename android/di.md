@@ -3,7 +3,11 @@
 > Dagger, Hilt, Dagger-Hilt 등  DI 프레임워크를 사용하면서도 무엇이 어떻게 다른지 모르는 상태였습니다. 구글에서 제공하는 기본 도큐먼트로 사용법 정도만 익힌지라 정확한 이해가 부족했습니다. 그래서 이번 기회에 Hilt에 대해 자세히 알아보고자 합니다.
 
 ## DI란?
+
 ### Types of dependencies
+
+**DI fundamentals**
+You'll understand what dependencies are and why you need to control them to create successful apps. 
 
 **Implementation inheritance**
 

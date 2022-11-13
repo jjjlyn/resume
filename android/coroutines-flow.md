@@ -197,7 +197,7 @@ Job은 queue에 들어간 코루틴을 조작하는 손잡이(handler)입니다.
 
 **flow 블록으로 생성한 Flow는 단 한번만 collect할 수 있습니다.** (Each Flow created by flow() can only be collected once — we cannot have multiple collectors.)
 
-**반면 StateFlow, SharedFlow는 구독자 모두가 동시에 값을 받을 수 있습니다.**
+**반면 StateFlow, SharedFlow는 구독자 모두가 동시에 데이터를 받을 수 있습니다.**
 
 MutableSharedFlow는 캐싱의 기능도 있습니다. `reply(N)`은 가장 최근에 내보낸 N개의 데이터를 캐싱한다는 의미입니다.
 
@@ -239,11 +239,11 @@ SharedFlow는 Broadcast type of communication을 제공하기 때문에 **실패
 
 SharedFlow의 모든 기능과 가장 최근에 내보낸 데이터에 대한 저장(캐싱) 기능을 포함합니다.
 
-- `.value`로 가장 최근 보낸 데이터에 접근할 수 있습니다. 직접 데이터에 접근하면 특정 시점의 StateFlow 값을 가져옵니다. 그러나 이 방법보다는 자주 변하는 데이터면 StateFlow를 구독하는 편이 낫습니다.
+- `.value`로 가장 최근 보낸 데이터에 접근할 수 있습니다. 직접 데이터에 접근하면 특정 시점의 StateFlow 데이터를 가져옵니다. 그러나 이 방법보다는 자주 변하는 데이터면 StateFlow를 구독하는 편이 낫습니다.
 - `collect`를 이용하여 구독할 수 있습니다(변화 감지).
 
 - **특정 한 곳에서만 업데이트 하는 상황이 보장될 때** `setValue()`(`.value`)로 업데이트 할 수 있습니다.
-- `tryEmit`를 사용하면 blocking 혹은 suspending할 필요가 없습니다. 값을 업데이트 하기 가장 안전한 방법입니다. 그러나 여러 차례에 걸쳐 값의 변화가 나타날 때 가장 최신의 데이터로 업데이트 된다는 보장이 없습니다.
+- `tryEmit`를 사용하면 blocking 혹은 suspending할 필요가 없습니다. 데이터를 업데이트 하기 가장 안전한 방법입니다. 그러나 여러 차례에 걸쳐 데이터의 변화가 나타날 때 가장 최신의 데이터로 업데이트 된다는 보장이 없습니다.
 - `emit`을 사용하면 코루틴 빌더 안에서 실행하거나 suspend 함수 내부에서 돌려야 합니다. 버퍼가 다 찼을 시 중단될 수 있습니다. 최신의 데이터로 업데이트하기에 가장 확실한 방법입니다.
   
 SharedFlow와는 Backpressure(데이터를 내보내는 속도가 너무 빠르거나, 받는 속도가 너무 느려서 중간에 데이터가 손실되는 상황)를 처리하는 방법에서 차이가 있습니다. SharedFlow가 여러 종류의 옵션을 제공하는 것에 반해, StateFlow는 단 하나의 옵션만을 제공합니다. 과거의 객체를 새로운 객체로 교체하는 방식으로, 이를 **Conflation**이라고 합니다.
@@ -257,7 +257,7 @@ StateFlow는 내용(content)의 일치성(equality)으로 conflation 여부를 �
 
 - Dispatcher Control
 
-  **LiveData는 메인 스레드에서만 관찰할 수 있습니다.** LiveData가 다른 특정 스레드에서 값을 내보내도록 하는 기능은 애초에 제공하지 않습니다. UI 계층에서 값을 받는 경우에는 상관 없으나, Room DB의 DAO가 LiveData를 반환하는 경우 UI 계층에 도달하기 전까지 이를 구독해서는 안됩니다. DAO와 UI 사이에는 Transformation과 MediatorLiveData가 필요한데, 이는 LiveData가 내보내는 결과값을 UI 계층에서 필요한 데이터 양식으로 조작하기 위해 사용합니다. 동시에 메인 스레드 외에 다른 장소에서 stream이 소비되지 않도록 해야 합니다.
+  **LiveData는 메인 스레드에서만 관찰할 수 있습니다.** LiveData가 다른 특정 스레드에서 데이터를 내보내도록 하는 기능은 애초에 제공하지 않습니다. UI 계층에서 데이터를 받는 경우에는 상관 없으나, Room DB의 DAO가 LiveData를 반환하는 경우 UI 계층에 도달하기 전까지 이를 구독해서는 안됩니다. DAO와 UI 사이에는 Transformation과 MediatorLiveData가 필요한데, 이는 LiveData가 내보내는 결과값을 UI 계층에서 필요한 데이터 양식으로 조작하기 위해 사용합니다. 동시에 메인 스레드 외에 다른 장소에서 stream이 소비되지 않도록 해야 합니다.
 
   StateFlow는 Dispatchers를 이용해 메인 스레드 외 장소에서도 데이터를 내보내거나 관찰할 수 있습니다.
 
