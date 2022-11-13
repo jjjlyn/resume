@@ -7,6 +7,10 @@
 ### Types of dependencies
 
 **DI fundamentals**
+This states that we should depend on abstractions rather than concretions. The idea here is to depend as much as possible on abstract classes and interfaces. This can be very difficult to achieve considering that we rely on concretions a lot of the time. Here, we should identify parts of the code that are constantly developed and subject to change and introduce layers of abstractions between our code and these classes. A good way to protect against
+this is through dependency injection frameworks such as Dagger and Hilt, which generate factories to create volatile components.
+
+
 You'll understand what dependencies are and why you need to control them to create successful apps. 
 
 **Implementation inheritance**
