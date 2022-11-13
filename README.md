@@ -59,6 +59,7 @@
 - Jetpack Navigation Deeplink를 이용하여 이벤트 공유하기 -> 앱 바로가기 기능 구현
 - [Firebase Crashlytics를 통해 앱 크래시 로그 추적](/android/handle-app-crash.md)
 - Firebase Analytics를 사용하여 이벤트 사용자 로그 추적
+- 그 외 문서는 [안드로이드 문서 바로가기](https://github.com/jjjlyn/resume/blob/main/android/android-docs.md)에서 확인하실 수 있습니다.
 
 **Duration.**
 
