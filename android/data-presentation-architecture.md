@@ -4,6 +4,25 @@ MVC, MVP, MVVM, MVI 등 `MV` 접두어가 달린 친구들은 **Data Presentatio
 
 <!-- 부끄럽지만 최근까지만 해도 **Model**, **View**, **비지니스 로직**이 정확히 무엇을 지칭하는 것인지 알지 못했습니다. 그도 그럴만한게 'MVC의 View는 XML 레이아웃을 지칭하고, MVP·MVVM·MVI의 View는 Activity 혹은 Fragment를 가리킨다'라는 말이 상당한 혼란을 주었습니다. 'Model은 데이터를 관리하는 기능을 한다'라는 말도 CRUD(Create, Read, Update, Delete) 작업을 포함하는 것인지 아니면 단순히 데이터 모델을 지칭하는 것인지 헷갈리기도 했고요.(저만 그런가요?) 이번 기회에 제대로 짚고 넘어가자는 의미에서 문서를 작성합니다.  -->
 
+## Dependency란 무엇인가?
+
+
+
+```kt
+@Singleton
+@Provides
+fun provideRetrofit(
+    okHttpClient: OkHttpClient,
+    gsonConverterFactory: MoshiConverterFactory
+): Retrofit {
+    return Retrofit.Builder()
+        .baseUrl("schema://host.com")
+        .client(okHttpClient)
+        .addConverterFactory(gsonConverterFactory)
+        .build()
+}
+```
+
 ## Model And View가 정확히 의미하는 바는?
 
 **Model**
@@ -178,7 +197,6 @@ class MyViewModel(
 어플리케이션의 상태 관리 차원에서 이점이 있는 아키텍처이다. 
 
 ## 그렇다면 작성자 본인은 무슨 패턴을 선택하였는가
-MVI도 써보고 MVVM도 써봤다. MVVM이 유지보수하기 더 편하다는 사견이다^^
 
 ## 참고
 
