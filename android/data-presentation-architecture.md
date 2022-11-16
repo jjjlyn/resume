@@ -2,27 +2,6 @@
 
 MVC, MVP, MVVM, MVI 등 `MV` 접두어가 달린 친구들은 **Data Presentation(Clean Architecture 관점에서 Presentation Layer)을 위한 소프트웨어 아키텍처 패턴**입니다.(**안드로이드 앱 전체를 위한 아키텍처로 착각하면 안 됩니다!!**) GUI 어플리케이션은 어찌되었든 사용자에게 fancy~~한 화면을 보여주는게 주 목적입니다. [오늘도 개발자가 안 된다고 말했다](http://www.yes24.com/Product/Goods/97919905)라는 책을 아시나요? UI 변경은 하루가 멀다하고 일어나는 이슈입니다. 그렇기 때문에 외형만 바꾸되 그 기반을 이루는 데이터에 변형이 일어나지 않도록 하는 것이 리소스(시간, 비용) 측면에서 매우 중요합니다. 예를 들어 UI 변경 부분, UI 변경 외(外) 부분 등 소스코드의 역할을 나누면 유지보수가 쉬워지겠죠. 더불어 UI 관련 외 부분에 대한 유닛 테스트(Unit test)도 가능해질 것입니다. 즉 `Model-View-Whatever` 소프트웨어 아키텍처 패턴은 관심사 분리(Separation of Concern)와 테스트하기 쉬운 코드 작성(Testable Code)을 위한 것입니다.
 
-<!-- 부끄럽지만 최근까지만 해도 **Model**, **View**, **비지니스 로직**이 정확히 무엇을 지칭하는 것인지 알지 못했습니다. 그도 그럴만한게 'MVC의 View는 XML 레이아웃을 지칭하고, MVP·MVVM·MVI의 View는 Activity 혹은 Fragment를 가리킨다'라는 말이 상당한 혼란을 주었습니다. 'Model은 데이터를 관리하는 기능을 한다'라는 말도 CRUD(Create, Read, Update, Delete) 작업을 포함하는 것인지 아니면 단순히 데이터 모델을 지칭하는 것인지 헷갈리기도 했고요.(저만 그런가요?) 이번 기회에 제대로 짚고 넘어가자는 의미에서 문서를 작성합니다.  -->
-
-## Dependency란 무엇인가?
-
-
-
-```kt
-@Singleton
-@Provides
-fun provideRetrofit(
-    okHttpClient: OkHttpClient,
-    gsonConverterFactory: MoshiConverterFactory
-): Retrofit {
-    return Retrofit.Builder()
-        .baseUrl("schema://host.com")
-        .client(okHttpClient)
-        .addConverterFactory(gsonConverterFactory)
-        .build()
-}
-```
-
 ## Model And View가 정확히 의미하는 바는?
 
 **Model**
@@ -164,11 +143,11 @@ Flow 객체에 대한 구독을 취소했으니 Activity가 destroy되었을 때
 ![MVVI](/android/images/mvvi.png)
 AAC(Android Architecture Components)를 통해 뷰 업데이트 로직과 비지니스 로직을 분리합니다.
 
-MVVM은 액티비티나 프래그먼트로부터 로직을 추출하는 Humble Object 패턴과는 다른 접근방식이다. View는 액티비티 혹은 프래그먼트, Model은 data management, ViewModel은 View가 요청할 때 Model로부터 데이터를 요청한다. 세 컴포넌트는 단방향의 흐름을 갖는다. View는 ViewModel에 의존성을 갖고, ViewModel은 Model에 의존성을 갖는다. 많은 View가 동일한 ViewModel을 사용할 수 있기 때문에 더 유연하다. View에서 데이터를 업데이트 하기 위해 ViewModel은 Observer 패턴으로 구현해야 한다. ViewModel은 Observable을 이용하여, View가 이를 구독하고 데이터를 실시간으로 변경할 수 있도록 해야 한다. 
+MVVM은 액티비티나 프래그먼트로부터 로직을 추출하는 Humble Object 패턴과는 다른 접근방식이다. View는 액티비티 혹은 프래그먼트, Model은 data management, ViewModel은 View가 요청할 때 Model로부터 데이터를 요청합니다. 세 컴포넌트는 단방향의 흐름을 갖습니다. View는 ViewModel에 의존하고, ViewModel은 Model에 의존합니다. 많은 View가 동일한 ViewModel을 사용할 수 있기 때문에 유연합니다. View에서 데이터를 업데이트 하기 위해 ViewModel은 Observer 패턴으로 구현해야 합니다. ViewModel은 Observable을 이용하여, View가 이를 구독하고 데이터를 실시간으로 변경할 수 있도록 해야 합니다. 
 
-AAC 라이브러리는 ViewModel 클래스를 제공하는데, 이는 액티비티와 프래그먼트의 생명주기에 맞춰 데이터 흐름을 관리해준다. Coroutine extensions와 결합된 AAC ViewModel은 액티비티나 프래그먼트가 더이상 데이터를 받으면 안되는 생명주기 상태에 있을 때 flow 혹은 coroutine의 구독을 중지하여 컨텍스트 누수를 막는다.
+AAC 라이브러리는 ViewModel 클래스를 제공하는데, 이는 액티비티와 프래그먼트의 생명주기에 맞춰 데이터 흐름을 관리합니다. Coroutine extensions와 결합된 AAC ViewModel은 액티비티나 프래그먼트가 더이상 데이터를 받으면 안되는 생명주기 상태에 있을 때 Flow 혹은 Coroutine의 구독을 중지하여 컨텍스트 누수를 막습니다.
 
-Clean Architecture 관점에서 ViewModel은 UseCase로부터 데이터를 가져온 후 entity를 Framework 계층이 필요로 하는 객체로 변환하는 역할을 한다(데이터 가공처리). 또한 사용자가 넘긴 데이터를 entity로 가공하여 UseCase로 넘기는 반대의 역할도 수행한다. 
+Clean Architecture 관점에서 ViewModel은 UseCase로부터 데이터를 가져온 후 entity를 Framework 계층이 필요로 하는 객체로 변환하는 역할을 합니다(데이터 가공처리). 또한 사용자가 넘긴 데이터를 entity로 가공하여 UseCase로 넘기는 반대의 역할도 수행합니다. 
 
 ```kt
 class MyViewModel(
@@ -194,9 +173,7 @@ class MyViewModel(
 
 > 주의: MVI의 Intent는 안드로이드 컴포넌트 통신에 사용되는 Intent가 아닙니다.
 
-어플리케이션의 상태 관리 차원에서 이점이 있는 아키텍처이다. 
-
-## 그렇다면 작성자 본인은 무슨 패턴을 선택하였는가
+MVVM과 대비되는 것이 아니라, MVVM 위에 Intent 기능을 얹힌 아키텍처 입니다.
 
 ## 참고
 
