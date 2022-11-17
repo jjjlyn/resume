@@ -31,9 +31,9 @@ Injector: 찾은(looked-up) 의존성 객체를 이를 필요로 하는 Field Pr
 
 ## Dagger2
 
-생명주기를 갖는 특정 **컴포넌트(Component)**에 **모듈(Module)**을 설치하여 사용합니다. 모듈은 **의존성(Dependency)**를 관리합니다.
+생명주기를 갖는 특정 **컴포넌트**(Component)에 **모듈**(Module)을 설치하여 사용합니다. 모듈은 **의존성**(Dependency)를 관리합니다.
 
-컴포넌트는 기본적으로 Application 전체의  생명주기를 따르기 때문에, 이는 그보다 작은 범위에서 의존성이 필요한 경우에는 메모리 낭비가 일어날 수 있습니다. Dagger2는 **서브 컴포넌트(SubComponent)**를 통해 보다 작은 범위의 생명주기를 지원합니다(e.g. ActivityScope).
+컴포넌트는 기본적으로 Application 전체의  생명주기를 따르기 때문에, 이는 그보다 작은 범위에서 의존성이 필요한 경우에는 메모리 낭비가 일어날 수 있습니다. Dagger2는 **서브 컴포넌트**(SubComponent)를 통해 보다 작은 범위의 생명주기를 지원합니다(e.g. ActivityScope).
 
 ## Hilt
 
@@ -80,3 +80,12 @@ class MainActivity : AppCompatActivity {
         classA.execute()
     }
 }
+```
+
+Reflection is a java tool that lets you get information about the properties, super classes, implemented interfaces, methods of a class and more by parsing the source code, bytecode or memory at runtime. Reflection has a big problem: performance. Yet parsing the code through reflection is something a tool nneds to do to understand the dependencies between the different classes of your app. Square had the great idea of moving the code parsing before the compilation task by using an annotation processor. The goal of this code generation task i s to create the code you execute to achieve dependency injection.
+Java and Kotlin botu compiled launguage -> compiler that translates your source code into bytecode, passing through some intermediate stages. To understand what the build process is, do a simple experement. Create a new Kotlin project with IntelliJ, and select the build task from the Gradle window, as in Figure 6.2:
+This is quire self-explanatory, and some of the tasks have been removed to save space.
+- Parsing the source code: Searching for custom annotations with data that provides additional information about the code itself.
+- Parsing the source code
+- Generating source files: create source files that the compiler will add to the existing ones????
+- 
