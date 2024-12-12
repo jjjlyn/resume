@@ -5,11 +5,7 @@
 안녕하세요:)</br>
 3년차 안드로이드 네이티브 개발자 정 린 입니다.
 
-![Profile](https://github.com/jjjlyn/resume/blob/main/profile.jpeg?raw=true)
-
 ## Introduce.
-
-숲과 나무 모두를 보려고 노력하는 개발자 입니다.</br>
 
 헬스케어 관련 스타트업에서 2년간 소프트웨어 개발 업무를 담당하였습니다.</br>
 안드로이드 앱(네이티브)을 주로 다룹니다.</br>
@@ -17,8 +13,6 @@
 ## Contact.
 
 - 이메일 : prize1142@gmail.com
-- 연락처 : (+82)10-5448-5611
-- 카카오톡 ID : rnldyal1259
 
 ## Documents. (In Progress)
 
